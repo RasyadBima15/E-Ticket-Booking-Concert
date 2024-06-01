@@ -1,4 +1,5 @@
-from main import db
+#Model/model
+from db import db
 
 #class models
 class User(db.Model):
