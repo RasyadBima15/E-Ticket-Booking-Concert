@@ -438,29 +438,29 @@ def get_tickets_by_concert(concert_id):
 
 
 #Update Ticket Status if the User has purchased a ticket  
-@app.route('/ticket/<int:ticket_id>', methods=['PUT'])
-@jwt_required()
-def update_ticket(ticket_id):
-    if current_user.Role == "Admin":
-        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
-    try:
-        data = request.json
-        new_status = data.get('Status')
+# @app.route('/ticket/<int:ticket_id>', methods=['PUT'])
+# @jwt_required()
+# def update_ticket(ticket_id):
+#     if current_user.Role == "Admin":
+#         return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
+#     try:
+#         data = request.json
+#         new_status = data.get('Status')
 
-        ticket = Ticket.query.get(ticket_id)
+#         ticket = Ticket.query.get(ticket_id)
 
-        if not ticket:
-            return jsonify({'message': 'Ticket not found'}), 404
+#         if not ticket:
+#             return jsonify({'message': 'Ticket not found'}), 404
 
-        ticket.Status = new_status
+#         ticket.Status = new_status
 
-        db.session.commit()
+#         db.session.commit()
 
-        return jsonify({'message': 'Ticket status updated successfully'}), 200
+#         return jsonify({'message': 'Ticket status updated successfully'}), 200
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': f'Failed to update ticket status. Error: {str(e)}'}), 
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'message': f'Failed to update ticket status. Error: {str(e)}'}), 
 
 # Create proof of payment
 @app.route('/payment', methods=['POST'])
@@ -480,6 +480,12 @@ def create_payment():
         user = User.query.get(user_id)
         if not user:
             return jsonify({'message': 'User not found'}), 404
+
+        ticket = Ticket.query.get(ticket_id)
+        if not ticket :
+            return jsonify({'message': 'Ticket not found'}), 404
+        
+        ticket.Status = "Soldout"
 
         if user.Balance < amount:
             return jsonify({'message': 'Insufficient balance'}), 400
