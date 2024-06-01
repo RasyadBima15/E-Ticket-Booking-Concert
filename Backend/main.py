@@ -1,6 +1,7 @@
 #main.py
+from datetime import datetime
 from flask import Flask, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, current_user, jwt_required
 from werkzeug.security import check_password_hash, generate_password_hash
 from Model.model import User, Concert, Payment, Ticket, Band
 from db import db
@@ -12,6 +13,11 @@ app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4c
 
 jwt = JWTManager(app)
 db.init_app(app)
+
+@jwt.user_lookup_loader
+def _user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return User.query.filter(User.Username==identity).first()
 
 #REGISTER
 @app.route('/register', methods=['POST'])
@@ -34,8 +40,7 @@ def register_user():
         db.session.rollback()
         return jsonify({'message': 'Failed to register user. Please try again later.'}), 500
 
-    access_token = create_access_token(identity=username)
-    return jsonify({'message': 'User registered successfully', 'access_token': access_token}), 201
+    return jsonify({'message': 'User registered successfully'}), 201
     
 #LOGIN     
 @app.route('/login', methods=['POST'])
@@ -54,7 +59,10 @@ def login_user():
 
 # Update the user's identity when filling out the order form
 @app.route('/user/<int:user_id>', methods=['PUT'])
+@jwt_required()
 def update_user(user_id):
+    if current_user.Role == "Admin":
+        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         new_fullname = data.get('Fullname')
@@ -78,7 +86,7 @@ def update_user(user_id):
 
         db.session.commit()
 
-        return jsonify({'message': 'User updated successfully', 'user_id': user_id}), 200
+        return jsonify({'message': 'User updated successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -87,7 +95,10 @@ def update_user(user_id):
 #BAND
 # Rute untuk membuat band baru
 @app.route('/band', methods=['POST'])
+@jwt_required()
 def create_band():
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         name = data.get('Name')
@@ -99,7 +110,7 @@ def create_band():
         db.session.add(new_band)
         db.session.commit()
 
-        return jsonify({'message': 'Band created successfully', 'band_id': new_band.IdBand}), 201
+        return jsonify({'message': 'Band created successfully'}), 201
 
     except Exception as e:
         db.session.rollback()
@@ -107,7 +118,10 @@ def create_band():
     
 # Rute untuk mengambil data band berdasarkan IdBand tertentu
 @app.route('/band/<int:band_id>', methods=['GET'])
+@jwt_required()
 def get_band(band_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         band = Band.query.get(band_id)
 
@@ -126,6 +140,7 @@ def get_band(band_id):
 
 # Rute untuk mengambil data band berdasarkan IdConcert tertentu
 @app.route('/band/concert/<int:concert_id>', methods=['GET'])
+@jwt_required()
 def get_band_by_concert(concert_id):
     try:
         bands = Band.query.filter_by(IdConcert=concert_id).all()
@@ -149,7 +164,10 @@ def get_band_by_concert(concert_id):
 
 # Rute untuk mengupdate detail band berdasarkan ID
 @app.route('/band/<int:band_id>', methods=['PUT'])
+@jwt_required()
 def update_band(band_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         name = data.get('Name')
@@ -170,7 +188,7 @@ def update_band(band_id):
 
         db.session.commit()
 
-        return jsonify({'message': 'Band updated successfully', 'band_id': band_id}), 200
+        return jsonify({'message': 'Band updated successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -179,7 +197,10 @@ def update_band(band_id):
 
 # Rute untuk menghapus band berdasarkan ID
 @app.route('/band/<int:band_id>', methods=['DELETE'])
+@jwt_required()
 def delete_band(band_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         band = Band.query.get(band_id)
 
@@ -189,7 +210,7 @@ def delete_band(band_id):
         db.session.delete(band)
         db.session.commit()
 
-        return jsonify({'message': 'Band deleted successfully', 'band_id': band_id}), 200
+        return jsonify({'message': 'Band deleted successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -198,7 +219,10 @@ def delete_band(band_id):
 #CONCERT
 # Rute untuk menambahkan concert baru
 @app.route('/concert', methods=['POST'])
+@jwt_required()
 def create_concert():
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         nama = data.get('Nama')
@@ -214,14 +238,17 @@ def create_concert():
         db.session.add(new_concert)
         db.session.commit()
 
-        return jsonify({'message': 'Concert created successfully', 'concert_id': new_concert.IdConcert}), 201
+        return jsonify({'message': 'Concert created successfully'}), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': f'Failed to create concert. Error: {str(e)}'}), 500
 
 @app.route('/concert/<int:concert_id>', methods=['GET'])
+@jwt_required()
 def get_concert(concert_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         concert = Concert.query.get(concert_id)
 
@@ -243,6 +270,7 @@ def get_concert(concert_id):
 
 # Rute untuk melihat semua concert
 @app.route('/concert', methods=['GET'])
+@jwt_required()
 def get_all_concerts():
     try:
         concerts = Concert.query.all()
@@ -269,7 +297,10 @@ def get_all_concerts():
 
 # Rute untuk mengedit detail concert berdasarkan ID
 @app.route('/concert/<int:concert_id>', methods=['PUT'])
+@jwt_required()
 def update_concert(concert_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         nama = data.get('Nama')
@@ -299,7 +330,7 @@ def update_concert(concert_id):
 
         db.session.commit()
 
-        return jsonify({'message': 'Concert updated successfully', 'concert_id': concert_id}), 200
+        return jsonify({'message': 'Concert updated successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -308,7 +339,10 @@ def update_concert(concert_id):
 
 # Rute untuk menghapus concert berdasarkan ID
 @app.route('/concert/<int:concert_id>', methods=['DELETE'])
+@jwt_required()
 def delete_concert(concert_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         concert = Concert.query.get(concert_id)
 
@@ -318,7 +352,7 @@ def delete_concert(concert_id):
         db.session.delete(concert)
         db.session.commit()
 
-        return jsonify({'message': 'Concert deleted successfully', 'concert_id': concert_id}), 200
+        return jsonify({'message': 'Concert deleted successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -326,7 +360,10 @@ def delete_concert(concert_id):
     
 #Post Ticket by Admin
 @app.route('/ticket', methods=['POST'])
+@jwt_required()
 def create_ticket():
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         id_concert = data.get('IdConcert')
@@ -339,7 +376,7 @@ def create_ticket():
         db.session.add(new_ticket)
         db.session.commit()
 
-        return jsonify({'message': 'Ticket created successfully', 'ticket_id': new_ticket.IdTicket}), 201
+        return jsonify({'message': 'Ticket created successfully'}), 201
 
     except Exception as e:
         db.session.rollback()
@@ -347,7 +384,10 @@ def create_ticket():
     
 #Get All Tickets
 @app.route('/ticket', methods=['GET'])
+@jwt_required()
 def get_all_tickets():
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         tickets = Ticket.query.all()
 
@@ -370,8 +410,11 @@ def get_all_tickets():
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
     
 #Get Ticket By Concert
-@app.route('/ticket/<int:concert_id>', methods=['GET'])
+@app.route('/ticket/concert/<int:concert_id>', methods=['GET'])
+@jwt_required()
 def get_tickets_by_concert(concert_id):
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         tickets = Ticket.query.filter_by(IdConcert=concert_id).all()
 
@@ -396,7 +439,10 @@ def get_tickets_by_concert(concert_id):
 
 #Update Ticket Status if the User has purchased a ticket  
 @app.route('/ticket/<int:ticket_id>', methods=['PUT'])
+@jwt_required()
 def update_ticket(ticket_id):
+    if current_user.Role == "Admin":
+        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         new_status = data.get('Status')
@@ -410,7 +456,7 @@ def update_ticket(ticket_id):
 
         db.session.commit()
 
-        return jsonify({'message': 'Ticket status updated successfully', 'ticket_id': ticket_id}), 200
+        return jsonify({'message': 'Ticket status updated successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -418,20 +464,34 @@ def update_ticket(ticket_id):
 
 # Create proof of payment
 @app.route('/payment', methods=['POST'])
+@jwt_required()
 def create_payment():
+    if current_user.Role == "Admin":
+        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         data = request.json
         user_id = data.get('IdUser')
         ticket_id = data.get('IdTicket')
-        payment_date = data.get('PaymentDate')
+        payment_date_str = data.get('PaymentDate')
         amount = data.get('Amount')
 
+        payment_date = datetime.strptime(payment_date_str, "%Y-%m-%d").date()
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        if user.Balance < amount:
+            return jsonify({'message': 'Insufficient balance'}), 400
+
         new_payment = Payment(IdUser=user_id, IdTicket=ticket_id, PaymentDate=payment_date, Amount=amount)
+
+        user.Balance -= amount
 
         db.session.add(new_payment)
         db.session.commit()
 
-        return jsonify({'message': 'Payment created successfully', 'payment_id': new_payment.IdPayment}), 201
+        return jsonify({'message': 'Payment created successfully'}), 201
 
     except Exception as e:
         db.session.rollback()
@@ -439,7 +499,10 @@ def create_payment():
     
 #get all payments
 @app.route('/payment', methods=['GET'])
+@jwt_required()
 def get_all_payments():
+    if current_user.Role == "User":
+        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         payments = Payment.query.all()
 
@@ -463,7 +526,10 @@ def get_all_payments():
 
 # Get payment by IdUser
 @app.route('/payment/user/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_payments_by_user(user_id):
+    if current_user.Role == "Admin":
+        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         payments = Payment.query.filter_by(IdUser=user_id).all()
 
