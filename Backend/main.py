@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/e-ticket-concert'
 app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
 
 jwt = JWTManager(app)
 db.init_app(app)
@@ -437,7 +438,7 @@ def get_tickets_by_concert(concert_id):
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
 
 
-#Update Ticket Status if the User has purchased a ticket  
+# Update Ticket Status if the User has purchased a ticket  
 # @app.route('/ticket/<int:ticket_id>', methods=['PUT'])
 # @jwt_required()
 # def update_ticket(ticket_id):
@@ -484,6 +485,9 @@ def create_payment():
         ticket = Ticket.query.get(ticket_id)
         if not ticket :
             return jsonify({'message': 'Ticket not found'}), 404
+        
+        if ticket.Status == "Soldout":
+            return jsonify({'message': 'Ticket has been soldout'}), 404
         
         ticket.Status = "Soldout"
 
