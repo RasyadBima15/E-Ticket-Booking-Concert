@@ -117,6 +117,30 @@ def create_band():
         db.session.rollback()
         return jsonify({'message': f'Failed to create band. Error: {str(e)}'}), 500
     
+# Rute untuk melihat semua concert
+@app.route('/bands', methods=['GET'])
+@jwt_required()
+def get_all_bands():
+    try:
+        bands = Band.query.all()
+
+        if not bands:
+            return jsonify({'message': 'No bands found'}), 404
+
+        bands_data = []
+        for band in bands:
+            bands_data.append({
+                'IdBand': band.IdBand,
+                'Name': band.Name,
+                'ImageBand': band.ImageBand,
+                'IdConcert': band.IdConcert,
+            })
+
+        return jsonify(bands_data), 200
+
+    except Exception as e:
+        return jsonify({'message': f'Failed to retrieve bands. Error: {str(e)}'}), 500
+    
 # Rute untuk mengambil data band berdasarkan IdBand tertentu
 @app.route('/band/<int:band_id>', methods=['GET'])
 @jwt_required()
