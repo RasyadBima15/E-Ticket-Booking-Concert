@@ -12,7 +12,7 @@ privateClient.interceptors.request.use(async (config) => {
     return {
         ...config,
         headers: {
-            "Content-Type": "appliaction/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`
         },
     };

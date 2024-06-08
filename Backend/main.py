@@ -5,8 +5,10 @@ from flask_jwt_extended import JWTManager, create_access_token, current_user, jw
 from werkzeug.security import check_password_hash, generate_password_hash
 from Model.model import User, Concert, Payment, Ticket, Band
 from db import db
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins="http://localhost:3000")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/e-ticket-concert'
 app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'

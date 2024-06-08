@@ -8,23 +8,23 @@ const userEndPoint = {
 }
 
 const userApi = {
-    loginUser: async ({Username, Password, Role}) => {
+    loginUser: async ({Username, Password}) => {
         try {
             const response = await publicClient.post(userEndPoint.loginUser, {
                 Username, 
                 Password,
-                Role,
             });
             return { response };
         } catch (error) {
             return {error}
         }
     },
-    registerUser: async ({Username, Password}) => {
+    registerUser: async ({Username, Password, Role}) => {
         try {
             const response = await publicClient.post(userEndPoint.registerUser, {
                 Username, 
-                Password
+                Password,
+                Role,
             });
             return { response };
         } catch (error) {
