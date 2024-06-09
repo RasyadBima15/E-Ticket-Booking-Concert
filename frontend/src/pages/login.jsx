@@ -11,10 +11,15 @@ export default function Login() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
         if (token) {
-            router.push("/");
+            if (role === "User"){
+                router.push("/");
+            } else if (role === "Admin"){
+                router.push("/admin")
+            }
         }
-    });
+    }, [router]);
 
     const loginForm = useFormik({
         initialValues: {
@@ -43,7 +48,15 @@ export default function Login() {
                 if (response) {
                     loginForm.resetForm()
                     localStorage.setItem("token", response.access_token);
-                    router.push('/');
+                    localStorage.setItem("role", response.role);
+
+                    if (response.role === "Admin"){
+                        console.log("test for admin");
+                        router.push('/admin');  
+                    } else if (response.role === "User"){
+                        console.log("test");
+                        router.push('/');  
+                    }
                 }
                 if (error) {
                     setErrorMessage(error.message)

@@ -12,10 +12,15 @@ export default function Register() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
         if (token) {
-            router.push("/");
+            if (role === "User"){
+                router.push("/");
+            } else if (role === "Admin"){
+                router.push("/admin")
+            }
         }
-    });
+    }, [router]);
 
     const registerForm = useFormik({
         initialValues: {
@@ -47,13 +52,10 @@ export default function Register() {
                     Role: "User",
                 })
                 if (response) {
-                    // console.log('Register Response:', response);
                     registerForm.resetForm()
-                    // localStorage.setItem("token", response.access_token);
                     router.push('/login');
                 }
                 if (error) {
-                    // console.log('Register Response:', error);
                     setErrorMessage(error.message)
                 }
             } catch (error) {
