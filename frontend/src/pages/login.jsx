@@ -16,7 +16,7 @@ export default function Login() {
             if (role === "User"){
                 router.push("/");
             } else if (role === "Admin"){
-                router.push("/admin")
+                router.push("/admin/concerts")
             }
         }
     }, [router]);
@@ -52,7 +52,7 @@ export default function Login() {
 
                     if (response.role === "Admin"){
                         console.log("test for admin");
-                        router.push('/admin');  
+                        router.push('/admin/concerts');  
                     } else if (response.role === "User"){
                         console.log("test");
                         router.push('/');  

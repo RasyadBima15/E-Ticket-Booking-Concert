@@ -56,7 +56,7 @@ def login_user():
 
     if user and check_password_hash(user.Password, password):
         access_token = create_access_token(identity=username)
-        return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
+        return jsonify({'message': 'Login successful', 'access_token': access_token, 'role': user.Role}), 200
     else:
         return jsonify({'message': 'Invalid username or password'}), 401  
 
@@ -395,7 +395,7 @@ def create_ticket():
         data = request.json
         id_concert = data.get('IdConcert')
         ticket_type = data.get('TicketType')
-        status = data.get('Status')
+        status = "Available"
         price = data.get('Price')
 
         new_ticket = Ticket(IdConcert=id_concert, TicketType=ticket_type, Status=status, Price=price)
