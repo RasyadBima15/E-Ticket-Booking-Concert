@@ -4,15 +4,23 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, current_user, jwt_required
 from werkzeug.security import check_password_hash, generate_password_hash
 from Model.model import User, Concert, Payment, Ticket, Band
+from werkzeug.utils import secure_filename
 from db import db
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app, origins="http://localhost:3000")
 
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/e-ticket-concert'
 app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 jwt = JWTManager(app)
 db.init_app(app)
@@ -242,7 +250,7 @@ def delete_band(band_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': f'Failed to delete band. Error: {str(e)}'}), 500
-    
+   
 #CONCERT
 # Rute untuk menambahkan concert baru
 @app.route('/concert', methods=['POST'])
@@ -251,15 +259,27 @@ def create_concert():
     if current_user.Role == "User":
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         nama = data.get('Nama')
         lokasi = data.get('Lokasi')
-        image_concert = data.get('ImageConcert')
+
         start_date = data.get('StartDate')
         end_date = data.get('EndDate')
         deskripsi = data.get('Deskripsi')
 
-        new_concert = Concert(Nama=nama, Lokasi=lokasi, ImageConcert=image_concert, 
+        # Handle file upload
+        file = request.files.get('ImageConcert')
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            file.save(file_path)
+        else:
+            return jsonify({'message': 'ImageConcert is required!'}), 400
+
+        # Create new Concert object
+        new_concert = Concert(Nama=nama, Lokasi=lokasi, ImageConcert=file_path,
                               StartDate=start_date, EndDate=end_date, Deskripsi=deskripsi)
 
         db.session.add(new_concert)
@@ -278,7 +298,7 @@ def get_concert(concert_id):
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         concert = Concert.query.get(concert_id)
-
+        print(concert)
         if not concert:
             return jsonify({'message': 'Concert not found'}), 404
 
@@ -296,7 +316,7 @@ def get_concert(concert_id):
         return jsonify({'message': f'Failed to retrieve concert details. Error: {str(e)}'}), 500
 
 # Rute untuk melihat semua concert
-@app.route('/concert', methods=['GET'])
+@app.route('/concerts', methods=['GET'])
 @jwt_required()
 def get_all_concerts():
     try:
@@ -304,9 +324,13 @@ def get_all_concerts():
 
         if not concerts:
             return jsonify({'message': 'No concerts found'}), 404
-
+        
         concerts_data = []
+        
         for concert in concerts:
+            concert_id = concert.IdConcert
+            total_ticket = Ticket.query.filter_by(IdConcert=concert_id).count()
+
             concerts_data.append({
                 'concert_id': concert.IdConcert,
                 'nama': concert.Nama,
@@ -314,6 +338,7 @@ def get_all_concerts():
                 'image_concert': concert.ImageConcert,
                 'start_date': concert.StartDate,
                 'end_date': concert.EndDate,
+                'total_ticket': total_ticket,
                 'deskripsi': concert.Deskripsi
             })
 
@@ -329,13 +354,27 @@ def update_concert(concert_id):
     if current_user.Role == "User":
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         nama = data.get('Nama')
         lokasi = data.get('Lokasi')
-        image_concert = data.get('ImageConcert')
         start_date = data.get('StartDate')
         end_date = data.get('EndDate')
         deskripsi = data.get('Deskripsi')
+
+        # Handle file upload
+        file = request.files.get('ImageConcert')
+        if file:
+            # Hapus gambar lama jika ada
+            concert = Concert.query.get(concert_id)
+            if concert and concert.ImageConcert:
+                old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], concert.ImageConcert)
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            # Simpan gambar baru
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
 
         concert = Concert.query.get(concert_id)
 
@@ -346,8 +385,8 @@ def update_concert(concert_id):
             concert.Nama = nama
         if lokasi:
             concert.Lokasi = lokasi
-        if image_concert:
-            concert.ImageConcert = image_concert
+        if file:
+            concert.ImageConcert = file_path
         if start_date:
             concert.StartDate = start_date
         if end_date:
@@ -375,6 +414,11 @@ def delete_concert(concert_id):
 
         if not concert:
             return jsonify({'message': 'Concert not found'}), 404
+        
+        if concert.ImageConcert:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], concert.ImageConcert)
+            if os.path.exists(image_path):
+                os.remove(image_path)
 
         db.session.delete(concert)
         db.session.commit()

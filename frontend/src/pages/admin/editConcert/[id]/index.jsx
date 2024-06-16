@@ -2,33 +2,39 @@
 import React, {useState} from 'react'
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import Sidebar from '../../components/Sidebar'
+import Image from 'next/image';
+import Sidebar from '../../../../components/Sidebar'
 import { useFormik } from 'formik';
 import ModalLogout from '@/components/ModalLogout';
 import concertApi from '@/api/modules/concerts.api';
 
-export default function addConcert() {
+export default function editConcert() {
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
     const [isOnRequest, setIsOnRequest] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(undefined);
-    const [file, setFile] = useState(null);
+    const [error, setError] = useState(undefined);
+    const [concert, setConcert] = useState(null);
+    const [existingImage, setExistingImage] = useState(null);
+    const { id } = router.query;
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
         if (!token) {
-        router.push('/login')
+            router.push('/login')
         } else if (role == "User"){
-        router.push('/')
+            router.push('/')
+        } else {
+            const fetchConcert = async () => {
+              const { response, error } = await concertApi.getConcert(id);
+              if (response) {
+                setConcert(response);
+                setExistingImage(response.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/'));
+              }
+            };
+            fetchConcert();
         }
-    }, [router]);
-
-    const handleFileChange = (event) => {
-        const uploadedFile = event.target.files[0];
-        concertForm.setFieldValue('imageConcert', uploadedFile);
-        setFile(uploadedFile);
-    };
+    }, [router, id]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -36,14 +42,26 @@ export default function addConcert() {
         router.push('/login');
         setShowModal(false);
     };
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        let month = (date.getMonth() + 1).toString();
+        let day = date.getDate().toString();
+        // Menambahkan leading zero jika diperlukan
+        month = month.length === 1 ? '0' + month : month;
+        day = day.length === 1 ? '0' + day : day;
+        return `${year}-${month}-${day}`;
+    };
+
     const concertForm = useFormik({
         initialValues: {
-            namaConcert: '',
-            location: '',
-            imageConcert: null,
-            startDate: '',
-            endDate: '',
-            deskripsi: ''
+            namaConcert: concert ? concert.nama : '',
+            location: concert ? concert.lokasi : '',
+            startDate: concert ? formatDate(concert.start_date) : '',
+            endDate: concert ? formatDate(concert.end_date) : '',
+            deskripsi: concert ? concert.deskripsi : '',
+            imageConcert: existingImage ? existingImage : null,
         },
         validate: values => {
             const errors = {};
@@ -54,7 +72,7 @@ export default function addConcert() {
                 errors.location = 'Required';
             }
             if (!values.imageConcert) {
-                errors.imageConcert = 'Image Concert is required';
+                errors.imageConcert = 'Required';
             }
             if (!values.startDate) {
                 errors.startDate = 'Required';
@@ -69,10 +87,10 @@ export default function addConcert() {
             }
             return errors;
         },
+        enableReinitialize: true,
         onSubmit: async (values) => {
             if (isOnRequest) return;
             setIsOnRequest(true);
-
             try {
                 const formData = new FormData();
                 formData.append('Nama', values.namaConcert);
@@ -81,18 +99,16 @@ export default function addConcert() {
                 formData.append('StartDate', values.startDate);
                 formData.append('EndDate', values.endDate);
                 formData.append('Deskripsi', values.deskripsi);
-                const { response, error } = await concertApi.createConcert(formData); 
-        
+                const {response, error} = await concertApi.updateConcert(formData, id);
                 if (response) {
-                    concertForm.resetForm();
-                    router.push('/admin/concerts');
+                    concertForm.resetForm()
+                    router.push('/admin/concerts')
                 }
-        
                 if (error) {
-                    setErrorMessage(error.message);
+                    setError(error.message)
                 }
             } catch (error) {
-                setErrorMessage("Pendaftaran gagal. Silahkan coba lagi!");
+                setError("Pendaftaran gagal. Silahkan coba lagi!")
             }
             setIsOnRequest(false)
         },
@@ -102,7 +118,7 @@ export default function addConcert() {
         <div className="min-h-screen flex">
             <Sidebar setShowModal={setShowModal}/>
             <main className="w-4/5 bg-gray-100 p-8">
-                <h1 className="text-2xl font-bold mb-8">Form Insert Data Concert</h1>
+                <h1 className="text-2xl font-bold mb-8">Edit Data Concert</h1>
                 <form onSubmit={concertForm.handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="namaConcert" className="block text-gray-700 font-bold mb-2">Nama Concert</label>
@@ -130,15 +146,22 @@ export default function addConcert() {
                     </div>
                     <div className="mb-4">
                         <label htmlFor="imageConcert" className="block text-gray-700 font-bold mb-2">Image Concert</label>
+                        {existingImage && (
+                            <div className="mb-2">
+                                <Image src={`${existingImage}`} width={300} height={150} alt="Concert" className="object-cover"/>
+                            </div>
+                        )}
                         <input
                             id="imageConcert"
                             name="imageConcert"
                             type="file"
                             accept="image/*"
                             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            onChange={handleFileChange}
+                            onChange={(event) => {
+                                concertForm.setFieldValue("imageConcert", event.currentTarget.files[0]);
+                            }}
                         />
-                        {concertForm.errors.imageConcert && <div className="text-red-500">{concertForm.errors.imageConcert}</div>}
+                        {concertForm.errors.imageConcert ? <div className="text-red-500">{concertForm.errors.imageConcert}</div> : null}
                     </div>
                     <div className="mb-4">
                         <label htmlFor="startDate" className="block text-gray-700 font-bold mb-2">Start Date</label>
@@ -175,9 +198,9 @@ export default function addConcert() {
                         ></textarea>
                         {concertForm.errors.deskripsi ? <div className="text-red-500">{concertForm.errors.deskripsi}</div> : null}
                     </div>
-                    {errorMessage && <div className="mt-2 text-sm text-red-600">{errorMessage}</div>}
+                    {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
                     <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Add Concert
+                        Edit Concert
                     </button>
                 </form>
             </main>

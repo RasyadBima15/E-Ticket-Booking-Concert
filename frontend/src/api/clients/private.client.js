@@ -9,11 +9,13 @@ const privateClient = axios.create({
 });
 
 privateClient.interceptors.request.use(async (config) => {
+    const token = localStorage.getItem("token");
     return {
         ...config,
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            ...config.headers,
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`
         },
     };
 });
@@ -22,7 +24,7 @@ privateClient.interceptors.response.use((response) => {
     if (response && response.data) return response.data;
     return response;
 }, (err) => {
-    throw err.response.data;
+    throw err.response;
 });
 
 export default privateClient;
