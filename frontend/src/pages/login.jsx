@@ -68,54 +68,65 @@ export default function Login() {
         }
     })
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded shadow-md">
-            <h1 className="text-2xl font-bold text-center">Login</h1>
-            <form onSubmit={loginForm.handleSubmit} className="space-y-6">
-            <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
-                </label>
-                <input
-                id="username"
-                name="username"
-                type="text"
-                onChange={loginForm.handleChange}
-                value={loginForm.values.username}
-                className="w-full p-2 mt-1 border border-gray-300 rounded shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                {loginForm.errors.username ? (
-                <div className="mt-2 text-sm text-red-600">{loginForm.errors.username}</div>
-                ) : null}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0 min-h-screen bg-gray-100">
+        {/* Bagian Kiri (Logo dan Selamat Datang) */}
+        <div className="flex items-center justify-center p-9 bg-cover bg-center rounded shadow-md" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
+            <div className="text-center text-white">
+                <img src="/images/logohd.png" alt="Logo" className="w-3/4 mb-4 mx-auto" />
+                <p className="text-700 mt-2">Masukkan username dan password untuk melanjutkan.</p>
             </div>
-            <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-                </label>
-                <input
-                id="password"
-                name="password"
-                type="password"
-                onChange={loginForm.handleChange}
-                value={loginForm.values.password}
-                className="w-full p-2 mt-1 border border-gray-300 rounded shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                {loginForm.errors.password ? (
-                <div className="mt-2 text-sm text-red-600">{loginForm.errors.password}</div>
-                ) : null}
-            </div>
-            {errorMessage && <div className="mt-2 text-sm text-red-600">{errorMessage}</div>}
-            <div>
-                <button
-                type="submit"
-                disabled={isOnRequest}
-                className="w-full px-4 py-2 font-bold text-white bg-purple-600 rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                {isOnRequest ? "Go to the homepage..." : "Login"}
-                </button>
-            </div>
-            </form>
         </div>
+        {/* Bagian Kanan (Form Login) */}
+        <div className="flex items-center justify-center p-9 bg-white rounded shadow-md">
+            <div className="w-full max-w-md">
+                <h1 className="text-2xl font-bold text-center mb-8">Login</h1>
+                <form onSubmit={loginForm.handleSubmit} className="space-y-6">
+                    <div>
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                            Username
+                        </label>
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            onChange={loginForm.handleChange}
+                            value={loginForm.values.username}
+                            className="w-full p-2 mt-1 border border-gray-300 rounded shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        {loginForm.errors.username ? (
+                            <div className="mt-2 text-sm text-red-600">{loginForm.errors.username}</div>
+                        ) : null}
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            Password
+                        </label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            onChange={loginForm.handleChange}
+                            value={loginForm.values.password}
+                            className="w-full p-2 mt-1 border border-gray-300 rounded shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        {loginForm.errors.password ? (
+                            <div className="mt-2 text-sm text-red-600">{loginForm.errors.password}</div>
+                        ) : null}
+                    </div>
+                    {errorMessage && <div className="mt-2 text-sm text-red-600">{errorMessage}</div>}
+                    <div>
+                        <button
+                            type="submit"
+                            disabled={isOnRequest}
+                            className="w-full px-4 py-2 font-bold text-white bg-purple-600 rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            {isOnRequest ? "Go to the homepage..." : "Login"}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
+    </div>
+    
     );
 }
