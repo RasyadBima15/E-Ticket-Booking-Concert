@@ -1,43 +1,40 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, {useState} from 'react'
-import { useEffect } from "react";
-import { useRouter } from "next/router";
-import Sidebar from '../../components/Sidebar'
+import React, { useState, useEffect } from 'react';
+import { useRouter} from "next/router";
+import Sidebar from '../../components/Sidebar';
 import { useFormik } from 'formik';
 import ModalLogout from '@/components/ModalLogout';
+import concertApi from '@/api/modules/concerts.api';
+import ticketApi from '@/api/modules/tickets.api';
 
 export default function addTicket() {
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
     const [isOnRequest, setIsOnRequest] = useState(false);
+    const [concerts, setConcerts] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
         if (!token) {
-        router.push('/login')
-        } else if (role == "User"){
-        router.push('/')
+            router.push('/login');
+        } else if (role === "User") {
+            router.push('/');
+        } else {
+            const fetchConcerts = async () => {
+                try {
+                    const { response } = await concertApi.getAllConcerts();
+                    if (response) {
+                        setConcerts(response);
+                    }
+                } catch (error) {
+                    setErrorMessage('Failed to fetch concerts');
+                }
+            };
+            fetchConcerts();
         }
     }, [router]);
-
-    const dummyConcerts = [
-        { id: 1, name: 'Concert 1' },
-        { id: 2, name: 'Concert 2' },
-        { id: 3, name: 'Concert 3' }
-    ];
-
-    const dummyTicketType = [
-        { id: 1, ticketType: 'Umum' },
-        { id: 2, ticketType: 'VIP' }
-    ];
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        router.push('/login');
-        setShowModal(false);
-    };
 
     const formik = useFormik({
         initialValues: {
@@ -66,18 +63,38 @@ export default function addTicket() {
             }
             return errors;
         },
-        onSubmit: values => {
-            // Submit logic here
-            console.log(values);
+        onSubmit: async (values) => {
+            if (isOnRequest) return;
+            setIsOnRequest(true);
+
+            try {
+                const { response, error } = await ticketApi.createTicket({
+                    IdConcert: values.namaConcert,
+                    TicketType: values.ticketType,
+                    Price: values.price,
+                    totalTicket: values.totalGenerateTicket,
+                    Status: 'Available'
+                });
+                if (response) {
+                    router.push('/admin/tickets');
+                }
+                if (error) {
+                    setErrorMessage(error.message);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to generate ticket. Please try again!");
+            }
+            setIsOnRequest(false);
         },
     });
 
-  return (
-    <div className='min-h-screen flex'>
-        <Sidebar setShowModal={setShowModal}/>
-        <main className="w-4/5 bg-gray-100 p-8">
-            <h1 className="text-2xl font-bold mb-8">Generate Ticket</h1>
-            <form onSubmit={formik.handleSubmit}>
+    return (
+        <div className='flex'>
+            <Sidebar setShowModal={setShowModal} />
+            <main className="flex-1 h-screen overflow-auto bg-gray-100 p-8 ml-[20%]">
+                <h1 className="text-2xl font-bold mb-8">Generate Ticket</h1>
+                {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+                <form onSubmit={formik.handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="namaConcert" className="block text-gray-700 font-bold mb-2">Nama Concert</label>
                         <select
@@ -88,11 +105,11 @@ export default function addTicket() {
                             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         >
                             <option value="">Select Concert</option>
-                            {dummyConcerts.map(concert => (
-                                <option key={concert.id} value={concert.name}>{concert.name}</option>
+                            {concerts && concerts.map(concert => (
+                                <option key={concert.concert_id} value={concert.concert_id}>{concert.nama}</option>
                             ))}
                         </select>
-                        {formik.errors.namaConcert ? <div className="text-red-500">{formik.errors.namaConcert}</div> : null}
+                        {formik.errors.namaConcert && <div className="text-red-500 text-sm">{formik.errors.namaConcert}</div>}
                     </div>
                     <div className="mb-4">
                         <label htmlFor="ticketType" className="block text-gray-700 font-bold mb-2">Ticket Type</label>
@@ -104,11 +121,10 @@ export default function addTicket() {
                             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         >
                             <option value="">Select Ticket Type</option>
-                            {dummyTicketType.map(ticket => (
-                                <option key={ticket.id} value={ticket.ticketType}>{ticket.ticketType}</option>
-                            ))}
+                            <option value="Umum">Umum</option>
+                            <option value="VIP">VIP</option>
                         </select>
-                        {formik.errors.ticketType ? <div className="text-red-500">{formik.errors.ticketType}</div> : null}
+                        {formik.errors.ticketType && <div className="text-red-500 text-sm">{formik.errors.ticketType}</div>}
                     </div>
                     <div className="mb-4">
                         <label htmlFor="price" className="block text-gray-700 font-bold mb-2">Price</label>
@@ -120,7 +136,7 @@ export default function addTicket() {
                             onChange={formik.handleChange}
                             value={formik.values.price}
                         />
-                        {formik.errors.price ? <div className="text-red-500">{formik.errors.price}</div> : null}
+                        {formik.errors.price && <div className="text-red-500 text-sm">{formik.errors.price}</div>}
                     </div>
                     <div className="mb-4">
                         <label htmlFor="totalGenerateTicket" className="block text-gray-700 font-bold mb-2">Total Generate Ticket</label>
@@ -132,17 +148,14 @@ export default function addTicket() {
                             onChange={formik.handleChange}
                             value={formik.values.totalGenerateTicket}
                         />
-                        {formik.errors.totalGenerateTicket ? <div className="text-red-500">{formik.errors.totalGenerateTicket}</div> : null}
+                        {formik.errors.totalGenerateTicket && <div className="text-red-500 text-sm">{formik.errors.totalGenerateTicket}</div>}
                     </div>
                     <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         {isOnRequest ? "Generate Ticket..." : "Add Ticket"}
                     </button>
                 </form>
-        </main>
-        {/* Aktifkan modal saat showModal bernilai true */}
-        {showModal && (
-                <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout}/>
-        )}
-    </div>
-  )
+            </main>
+            {showModal && <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout} />}
+        </div>
+    );
 }

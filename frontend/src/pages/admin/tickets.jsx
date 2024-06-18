@@ -1,21 +1,36 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React , { useState } from 'react'
-import { useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/router";
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/Sidebar';
 import ModalLogout from "@/components/ModalLogout";
+import ticketApi from '@/api/modules/tickets.api';
+import concertApi from '@/api/modules/concerts.api';
 
-export default function tickets() {
+export default function Tickets() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [concerts, setConcerts] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     if (!token) {
-      router.push('/login')
-    } else if (role == "User"){
-      router.push('/')
+      router.push('/login');
+    } else if (role === "User") {
+      router.push('/');
+    } else {
+      const fetchTickets = async () => {
+        const { response: ticketResponse } = await ticketApi.getAllTickets();
+        const { response: concertResponse } = await concertApi.getAllConcerts();
+        if (ticketResponse) {
+          setTickets(ticketResponse);
+        }
+        if (concertResponse){
+          setConcerts(concertResponse);
+        }
+      };
+      fetchTickets();
     }
   }, [router]);
 
@@ -25,11 +40,26 @@ export default function tickets() {
     router.push('/login');
     setShowModal(false);
   };
-  
+
+  const getConcertNameById = (concertId) => {
+    if (concerts.length > 0){
+      const concert = concerts.find(concert => concert.concert_id === concertId);
+      if (!concert){
+        return 'Unknown';
+      }
+      return concert.nama
+    }
+    return 'Unknown';
+  };
+
+  const formatRupiah = (number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+  };
+
   return (
-    <div className='min-h-screen flex'>
-      <Sidebar setShowModal={setShowModal}/>
-      <main className='w-4/5 bg-gray-100 p-8'>
+    <div className='flex'>
+      <Sidebar setShowModal={setShowModal} />
+      <main className='flex-1 h-screen overflow-auto bg-gray-100 p-8 ml-[20%]'>
         <h1 className="text-2xl font-bold mb-8">List Tickets</h1>
         <div className="mb-4 flex justify-end">
           <button
@@ -51,22 +81,22 @@ export default function tickets() {
               </tr>
             </thead>
             <tbody>
-              <tr className="bg-gray-100">
-                <td className="border border-gray-300 px-4 py-2 text-center">1</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">SummerRoad</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">VIP</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">Available</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">Rp.100.000,00</td>
-              </tr>
-              {/* Tambahkan baris lain sesuai data */}
+              {tickets.map((ticket, index) => (
+                <tr key={index} className="bg-gray-100">
+                  <td className="border border-gray-300 px-4 py-2 text-center">{ticket.IdTicket}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{getConcertNameById(ticket.IdConcert)}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{ticket.TicketType}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{ticket.Status}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{formatRupiah(ticket.Price)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </main>
-      {/* Aktifkan modal saat showModal bernilai true */}
       {showModal && (
-        <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout}/>
+        <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout} />
       )}
     </div>
-  )
+  );
 }

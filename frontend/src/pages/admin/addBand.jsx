@@ -95,9 +95,9 @@ export default function addBand() {
     });
 
     return (
-        <div className="min-h-screen flex">
+        <div className="flex">
             <Sidebar setShowModal={setShowModal}/>
-            <main className="w-4/5 bg-gray-100 p-8">
+            <main className="flex-1 h-screen overflow-auto bg-gray-100 p-8 ml-[20%]">
                 <h1 className="text-2xl font-bold mb-8">Form Insert Data Band</h1>
                 <form onSubmit={formik.handleSubmit}>
                     <div className="mb-4">

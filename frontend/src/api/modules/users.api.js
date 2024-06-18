@@ -5,6 +5,7 @@ const userEndPoint = {
     loginUser: '/login',
     registerUser: '/register',
     updateUser: ({userId}) => `/user/${userId}`,
+    getAllUsers: '/users',
 }
 
 const userApi = {
@@ -43,7 +44,15 @@ const userApi = {
         } catch (error) {
             return {error}
         }
-    }
+    },
+    getAllUsers: async () => {
+        try {
+            const response = await privateClient.get(userEndPoint.getAllUsers);
+            return { response };
+        } catch (error) {
+            return {error}
+        }
+    },
 }
 
 export default userApi;

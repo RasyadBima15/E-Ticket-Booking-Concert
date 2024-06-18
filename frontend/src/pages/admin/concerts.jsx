@@ -1,14 +1,13 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/Sidebar';
 import ModalLogout from "@/components/ModalLogout";
-import concertApi from "@/api/modules/concerts.api";
 import ModalDelete from "@/components/ModalDelete";
+import concertApi from "@/api/modules/concerts.api";
 
-export default function Admin() {
+export default function Concerts() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [showModalDelete, setShowModalDelete] = useState(false);
@@ -20,7 +19,7 @@ export default function Admin() {
     const role = localStorage.getItem("role");
     if (!token) {
       router.push('/login')
-    } else if (role == "User"){
+    } else if (role === "User") {
       router.push('/')
     } else {
       const fetchConcerts = async () => {
@@ -49,27 +48,26 @@ export default function Admin() {
     if (response) {
       const updatedConcerts = concerts.filter(concert => concert.concert_id !== concertToDelete.concert_id);
       setConcerts(updatedConcerts);
-      router.push('/admin/concerts')
+      router.push('/admin/concerts');
       setShowModalDelete(false);
       setConcertToDelete(null);
     }
-  }
+  };
 
   const openDeleteModal = (concert) => {
     setConcertToDelete(concert);
     setShowModalDelete(true);
-  }
+  };
 
   const handleEdit = (id) => {
     router.push(`/admin/editConcert/${id}`);
-  }
+  };
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar setShowModal={setShowModal}/>
-  
-      <main className="w-4/5 bg-gray-100 p-8">
-        <h1 className="text-2xl font-bold mb-8">List Concert</h1>
+    <div className="flex">
+      <Sidebar setShowModal={setShowModal} />
+      <main className="flex-1 h-screen overflow-auto bg-gray-100 p-8 ml-[20%]">
+        <h1 className="text-2xl font-bold mb-8">List Concerts</h1>
         <div className="mb-4 flex justify-end">
           <button
             className="bg-purple-600 text-white px-4 py-2 rounded"
@@ -92,37 +90,32 @@ export default function Admin() {
               </tr>
             </thead>
             <tbody>
-            {concerts.map((concert, index) => (
+              {concerts.map((concert, index) => (
                 <tr key={index} className="bg-gray-100">
-                    <td className="border border-gray-300 px-4 py-2">{concert.nama}</td>
-                    <td className="border border-gray-300 px-4 py-2">{concert.lokasi}</td>
-                    <td className="border border-gray-300 px-4 py-2">{new Date(concert.start_date).toLocaleDateString()}</td>
-                    <td className="border border-gray-300 px-4 py-2">{new Date(concert.end_date).toLocaleDateString()}</td>
-                    <td className="border border-gray-300 px-4 py-2">{concert.total_ticket}</td>
-                    <td className="border border-gray-300 px-4 py-2">{concert.deskripsi}</td>
-                    <td className="border border-gray-300 px-4 py-2 flex justify-center">
-                        <button onClick={() => handleEdit(concert.concert_id)} className="mr-5 text-green-600">
-                            <FontAwesomeIcon icon={faEdit} />
-                        </button>
-                        <button onClick={() => openDeleteModal(concert)} className="text-red-600">
-                            <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                    </td>
+                  <td className="border border-gray-300 px-4 py-2">{concert.nama}</td>
+                  <td className="border border-gray-300 px-4 py-2">{concert.lokasi}</td>
+                  <td className="border border-gray-300 px-4 py-2">{new Date(concert.start_date).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-4 py-2">{new Date(concert.end_date).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-4 py-2">{concert.total_ticket}</td>
+                  <td className="border border-gray-300 px-4 py-2">{concert.deskripsi}</td>
+                  <td className="border border-gray-300 px-4 py-2 flex justify-center">
+                    <button onClick={() => handleEdit(concert.concert_id)} className="mr-5 text-green-600">
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button onClick={() => openDeleteModal(concert)} className="text-red-600">
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </td>
                 </tr>
-            ))}
-              {/* Tambahkan baris lain sesuai data */}
+              ))}
             </tbody>
           </table>
         </div>
       </main>
-      {/* Aktifkan modal saat showModal bernilai true */}
-      {showModal && (
-        <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout}/>
-      )}
-      {/* Aktifkan modal saat showModal bernilai true */}
-      {showModalDelete && (
-        <ModalDelete setShowModalDelete={setShowModalDelete} handleDelete={handleDelete}/>
-      )}
+      {/* Modal Logout */}
+      {showModal && <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout} />}
+      {/* Modal Delete */}
+      {showModalDelete && <ModalDelete setShowModalDelete={setShowModalDelete} handleDelete={handleDelete} />}
     </div>
-  );  
+  );
 }
