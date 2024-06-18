@@ -17,7 +17,7 @@ export default function Register() {
             if (role === "User"){
                 router.push("/");
             } else if (role === "Admin"){
-                router.push("/admin")
+                router.push("/admin/concerts")
             }
         }
     }, [router]);
