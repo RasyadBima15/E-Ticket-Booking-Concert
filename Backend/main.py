@@ -464,30 +464,43 @@ def delete_concert(concert_id):
         return jsonify({'message': f'Failed to delete concert. Error: {str(e)}'}), 500
     
 #Post Ticket by Admin
+
+    
 @app.route('/ticket', methods=['POST'])
 @jwt_required()
 def create_ticket():
     if current_user.Role == "User":
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
+
     try:
-        data = request.json
-        id_concert = data.get('IdConcert')
-        ticket_type = data.get('TicketType')
-        status = "Available"
-        price = data.get('Price')
+        # Ambil data dari permintaan POST
+        data = request.get_json()
 
-        new_ticket = Ticket(IdConcert=id_concert, TicketType=ticket_type, Status=status, Price=price)
+        # Validasi data
+        if 'IdConcert' not in data or 'TicketType' not in data or 'Status' not in data or 'Price' not in data or 'totalTicket' not in data:
+            return jsonify({'message': 'Semua kolom harus diisi'}), 400
 
+        # Buat objek Ticket baru
+        new_ticket = Ticket(
+            IdConcert=data['IdConcert'],
+            TicketType=data['TicketType'],
+            Status=data['Status'],
+            Price=data['Price'],
+            totalTicket=data['totalTicket']
+        )
+
+        # Tambahkan ke session dan commit ke basis data
         db.session.add(new_ticket)
         db.session.commit()
 
-        return jsonify({'message': 'Ticket created successfully'}), 201
+        return jsonify({'message': 'Tiket berhasil ditambahkan', 'ticket_id': new_ticket.IdTicket}), 201
 
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': f'Failed to create ticket. Error: {str(e)}'}), 500
+        return jsonify({'message': f'Gagal menambahkan tiket. Error: {str(e)}'}), 500
+
     
 #Get All Tickets
+
 @app.route('/ticket', methods=['GET'])
 @jwt_required()
 def get_all_tickets():
@@ -501,20 +514,14 @@ def get_all_tickets():
 
         tickets_data = []
         for ticket in tickets:
-            tickets_data.append({
-                'ticket_id': ticket.IdTicket,
-                'concert_id': ticket.IdConcert,
-                'ticket_type': ticket.TicketType,
-                'status': ticket.Status,
-                'price': ticket.Price
-            })
+            ticket_dict = ticket.as_dict()
+            tickets_data.append(ticket_dict)
 
         return jsonify(tickets_data), 200
 
     except Exception as e:
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
-    
-#Get Ticket By Concert
+
 @app.route('/ticket/concert/<int:concert_id>', methods=['GET'])
 @jwt_required()
 def get_tickets_by_concert(concert_id):
@@ -528,20 +535,14 @@ def get_tickets_by_concert(concert_id):
 
         tickets_data = []
         for ticket in tickets:
-            tickets_data.append({
-                'ticket_id': ticket.IdTicket,
-                'concert_id': ticket.IdConcert,
-                'ticket_type': ticket.TicketType,
-                'status': ticket.Status,
-                'price': ticket.Price
-            })
+            ticket_dict = ticket.as_dict()
+            tickets_data.append(ticket_dict)
 
         return jsonify(tickets_data), 200
 
     except Exception as e:
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
-
-
+    
 # Update Ticket Status if the User has purchased a ticket  
 # @app.route('/ticket/<int:ticket_id>', methods=['PUT'])
 # @jwt_required()
