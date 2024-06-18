@@ -2,18 +2,22 @@
 import React, {useState} from 'react'
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import Sidebar from '../../components/Sidebar'
+import Sidebar from '@/components/Sidebar';
 import { useFormik } from 'formik';
 import ModalLogout from '@/components/ModalLogout';
 import bandApi from '@/api/modules/bands.api';
 import concertApi from '@/api/modules/concerts.api';
+import Image from 'next/image';
 
-export default function addBand() {
+export default function editBand() {
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
     const [isOnRequest, setIsOnRequest] = useState(false);
     const [errorMessage, setErrorMessage] = useState(undefined);
+    const [band, setBand] = useState(null);
     const [concerts, setConcerts] = useState([]);
+    const [existingImage, setExistingImage] = useState(null);
+    const { id } = router.query;
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -22,22 +26,31 @@ export default function addBand() {
         router.push('/login')
         } else if (role == "User"){
         router.push('/')
-        }
-        const fetchConcerts = async () => {
-            try {
-                const { response } = await concertApi.getAllConcerts();
-                // console.log("response:", response);
-                // console.log("error:", error.data);
+        } else {
+            const fetchBand = async () => {
+                const { response } = await bandApi.getBand(id);
                 if (response) {
-                    setConcerts(response);
-                    // console.log(concerts);
+                  setBand(response);
+                  setExistingImage(response.image_band.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/'));
                 }
-            } catch (error) {
-                setErrorMessage('Failed to fetch concerts');
-            }
-        };
-        fetchConcerts();
-    }, [router]);
+            };
+            const fetchConcerts = async () => {
+                try {
+                    const { response } = await concertApi.getAllConcerts();
+                    // console.log("response:", response);
+                    // console.log("error:", error.data);
+                    if (response) {
+                        setConcerts(response);
+                        // console.log(concerts);
+                    }
+                } catch (error) {
+                    setErrorMessage('Failed to fetch concerts');
+                }
+            };
+            fetchConcerts();
+            fetchBand();
+        }
+    }, [router, id]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -48,9 +61,9 @@ export default function addBand() {
 
     const formik = useFormik({
         initialValues: {
-            namaBand: '',
-            idConcert: '',
-            imageBand: ''
+            namaBand: band? band.name : '',
+            idConcert: band? band.id_concert : '',
+            imageBand: existingImage? existingImage : null,
         },
         validate: values => {
             const errors = {};
@@ -65,6 +78,7 @@ export default function addBand() {
             }
             return errors;
         },
+        enableReinitialize: true,
         onSubmit: async (values) => {
             if (isOnRequest) return;
             setIsOnRequest(true);
@@ -74,11 +88,7 @@ export default function addBand() {
                 formData.append('Name', values.namaBand);
                 formData.append('ImageBand', values.imageBand);
                 formData.append('IdConcert', values.idConcert);
-                console.log(formData);
-                const { response, error } = await bandApi.createBand(formData); 
-                console.log("response:", response);
-                console.log("error:", error);
-
+                const { response, error } = await bandApi.updateBand(formData, id); 
                 if (response) {
                     formik.resetForm();
                     router.push('/admin/bands');
@@ -98,7 +108,7 @@ export default function addBand() {
         <div className="min-h-screen flex">
             <Sidebar setShowModal={setShowModal}/>
             <main className="w-4/5 bg-gray-100 p-8">
-                <h1 className="text-2xl font-bold mb-8">Form Insert Data Band</h1>
+                <h1 className="text-2xl font-bold mb-8">Edit Data Band</h1>
                 <form onSubmit={formik.handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="namaBand" className="block text-gray-700 font-bold mb-2">Nama Band</label>
@@ -132,6 +142,11 @@ export default function addBand() {
                     </div>
                     <div className="mb-4">
                         <label htmlFor="imageBand" className="block text-gray-700 font-bold mb-2">Image Band</label>
+                        {existingImage && (
+                            <div className="mb-2">
+                                <Image src={`${existingImage}`} width={300} height={150} alt="Concert" className="object-cover"/>
+                            </div>
+                        )}
                         <input
                             id="imageBand"
                             name="imageBand"
@@ -145,7 +160,7 @@ export default function addBand() {
                     </div>
                     {errorMessage && <div className="mt-2 mb-2 text-sm text-red-600">{errorMessage}</div>}
                     <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Add Band
+                        Edit Band
                     </button>
                 </form>
             </main>

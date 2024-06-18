@@ -12,15 +12,17 @@ import os
 app = Flask(__name__)
 CORS(app, origins="http://localhost:3000")
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images')
+UPLOAD_CONCERT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images', 'concerts')
+UPLOAD_BAND = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images', 'bands')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/e-ticket-concert'
 app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_CONCERT'] = UPLOAD_CONCERT
+app.config['UPLOAD_BAND'] = UPLOAD_BAND
 
-# Ensure the upload folder exists
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Ensure the upload Concert exists
+os.makedirs(UPLOAD_CONCERT, exist_ok=True)
 
 jwt = JWTManager(app)
 db.init_app(app)
@@ -111,12 +113,22 @@ def create_band():
     if current_user.Role == "User":
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         name = data.get('Name')
-        image_band = data.get('ImageBand')
         id_concert = data.get('IdConcert')
 
-        new_band = Band(Name=name, ImageBand=image_band, IdConcert=id_concert)
+        # Handle file upload
+        file = request.files.get('ImageBand')
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_BAND'], filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            file.save(file_path)
+        else:
+            return jsonify({'message': 'ImageBand is required!'}), 400
+
+        new_band = Band(Name=name, ImageBand=file_path, IdConcert=id_concert)
 
         db.session.add(new_band)
         db.session.commit()
@@ -204,10 +216,26 @@ def update_band(band_id):
     if current_user.Role == "User":
         return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         name = data.get('Name')
-        image_band = data.get('ImageBand')
         id_concert = data.get('IdConcert')
+
+        # Handle file upload
+        file = request.files.get('ImageBand')
+        if file:
+            # Hapus gambar lama jika ada
+            band = Band.query.get(band_id)
+            if band and band.ImageBand:
+                old_image_path = os.path.join(app.config['UPLOAD_BAND'], band.ImageBand)
+                print(old_image_path)
+                print(band.ImageBand)
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            # Simpan gambar baru
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_BAND'], filename)
+            file.save(file_path)
 
         band = Band.query.get(band_id)
 
@@ -216,8 +244,8 @@ def update_band(band_id):
 
         if name:
             band.Name = name
-        if image_band:
-            band.ImageBand = image_band
+        if file:
+            band.ImageBand = file_path
         if id_concert:
             band.IdConcert = id_concert
 
@@ -227,6 +255,7 @@ def update_band(band_id):
 
     except Exception as e:
         db.session.rollback()
+        print(e)
         return jsonify({'message': f'Failed to update band. Error: {str(e)}'}), 500
 
 
@@ -241,6 +270,11 @@ def delete_band(band_id):
 
         if not band:
             return jsonify({'message': 'Band not found'}), 404
+
+        if band.ImageBand:
+            image_path = os.path.join(app.config['UPLOAD_BAND'], band.ImageBand)
+            if os.path.exists(image_path):
+                os.remove(image_path)
 
         db.session.delete(band)
         db.session.commit()
@@ -271,7 +305,7 @@ def create_concert():
         file = request.files.get('ImageConcert')
         if file:
             filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(app.config['UPLOAD_CONCERT'], filename)
             if os.path.exists(file_path):
                 os.remove(file_path)
             file.save(file_path)
@@ -367,13 +401,13 @@ def update_concert(concert_id):
             # Hapus gambar lama jika ada
             concert = Concert.query.get(concert_id)
             if concert and concert.ImageConcert:
-                old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], concert.ImageConcert)
+                old_image_path = os.path.join(app.config['UPLOAD_CONCERT'], concert.ImageConcert)
                 if os.path.exists(old_image_path):
                     os.remove(old_image_path)
             
             # Simpan gambar baru
             filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(app.config['UPLOAD_CONCERT'], filename)
             file.save(file_path)
 
         concert = Concert.query.get(concert_id)
@@ -416,7 +450,7 @@ def delete_concert(concert_id):
             return jsonify({'message': 'Concert not found'}), 404
         
         if concert.ImageConcert:
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], concert.ImageConcert)
+            image_path = os.path.join(app.config['UPLOAD_CONCERT'], concert.ImageConcert)
             if os.path.exists(image_path):
                 os.remove(image_path)
 

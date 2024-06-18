@@ -11,13 +11,9 @@ const bandEndPoint = {
 }
 
 const bandApi = {
-    createBand: async ({Name, ImageBand, IdConcert}) => {
+    createBand: async (formData) => {
         try {
-            const response = await privateClient.post(bandEndPoint.createBand, {
-                Name, 
-                ImageBand,
-                IdConcert,
-            });
+            const response = await privateClient.post(bandEndPoint.createBand, formData);
             return { response };
         } catch (error) {
             return {error}
@@ -31,7 +27,7 @@ const bandApi = {
             return {error}
         }
     },
-    getBand: async ({bandId}) => {
+    getBand: async (bandId) => {
         try {
             const response = await privateClient.get(bandEndPoint.getBand({bandId}));
             return { response };
@@ -47,19 +43,15 @@ const bandApi = {
             return {error}
         }
     },
-    updateBand: async ({bandId}, {Name, ImageBand, IdConcert}) => {
+    updateBand: async (formData, bandId) => {
         try {
-            const response = await privateClient.put(bandEndPoint.updateBand({bandId}), {
-                Name,
-                ImageBand,
-                IdConcert,
-            });
+            const response = await privateClient.put(bandEndPoint.updateBand({bandId}), formData);
             return { response };
         } catch (error) {
             return {error}
         }
     },
-    deleteBand: async ({bandId}) => {
+    deleteBand: async (bandId) => {
         try {
             const response = await privateClient.delete(bandEndPoint.deleteBand({bandId}));
             return { response };

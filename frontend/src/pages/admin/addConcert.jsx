@@ -12,7 +12,6 @@ export default function addConcert() {
     const [showModal, setShowModal] = useState(false);
     const [isOnRequest, setIsOnRequest] = useState(false);
     const [errorMessage, setErrorMessage] = useState(undefined);
-    const [file, setFile] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -27,7 +26,6 @@ export default function addConcert() {
     const handleFileChange = (event) => {
         const uploadedFile = event.target.files[0];
         concertForm.setFieldValue('imageConcert', uploadedFile);
-        setFile(uploadedFile);
     };
 
     const handleLogout = () => {
@@ -175,7 +173,7 @@ export default function addConcert() {
                         ></textarea>
                         {concertForm.errors.deskripsi ? <div className="text-red-500">{concertForm.errors.deskripsi}</div> : null}
                     </div>
-                    {errorMessage && <div className="mt-2 text-sm text-red-600">{errorMessage}</div>}
+                    {errorMessage && <div className="mt-2 mb-2 text-sm text-red-600">{errorMessage}</div>}
                     <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         Add Concert
                     </button>

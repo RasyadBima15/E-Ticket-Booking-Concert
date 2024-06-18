@@ -26,7 +26,7 @@ export default function editConcert() {
             router.push('/')
         } else {
             const fetchConcert = async () => {
-              const { response, error } = await concertApi.getConcert(id);
+              const { response } = await concertApi.getConcert(id);
               if (response) {
                 setConcert(response);
                 setExistingImage(response.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/'));
