@@ -36,12 +36,13 @@ class Concert(db.Model):
 
 class Ticket(db.Model):
     __tablename__ = 'Ticket'
-
+    
     IdTicket = db.Column(db.Integer, primary_key=True, autoincrement=True)
     IdConcert = db.Column(db.Integer, db.ForeignKey('Concert.IdConcert'))
     TicketType = db.Column(db.Enum('VIP', 'Umum'), nullable=False)
     Status = db.Column(db.Enum('Available', 'Soldout'), nullable=False)
     Price = db.Column(db.Integer, nullable=False)
+    totalTicket = db.Column(db.Integer, nullable=False)
 
 class Payment(db.Model):
     __tablename__ = 'Payment'
