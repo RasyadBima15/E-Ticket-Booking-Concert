@@ -15,6 +15,7 @@ export default function Concert() {
   const [imageConcert, setImageConcert] = useState(null);
   const [ticketPrice, setTicketPrice] = useState(null)
   const [bands, setBands] = useState([])
+  const [isEventClosed, setIsEventClosed] = useState([])
   const { id } = router.query;
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function Concert() {
                 )
                 .replace(/\\/g, '/')
             );
+            setIsEventClosed(new Date(response.start_date) < new Date());
           }
         } catch (error) {
           console.error("Error fetching concert:", error);
@@ -180,7 +182,12 @@ export default function Concert() {
             <div className="flex flex-col items-center border border-gray-300 py-4 px-6 rounded">
                 <div className="font-medium text-center mb-2">Fees Starting At:</div>
                 <div className="text-purple-800 text-center font-bold mb-4">{formatRupiah(ticketPrice)}</div>
-                <button className="bg-purple-800 text-white py-2 px-4 rounded w-full">Order Now</button>
+                <button
+                  className={`py-2 px-4 rounded w-full ${isEventClosed ? 'bg-gray-500 text-white' : 'bg-purple-800 text-white'}`}
+                  disabled={isEventClosed}
+                  >
+                  {isEventClosed ? 'Closed' : 'Order Now'}
+                </button>
             </div>
         </div>
 
