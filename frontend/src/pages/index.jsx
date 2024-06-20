@@ -29,8 +29,6 @@ export default function Home() {
         setUpcomingEvents(upcoming);
         setPreviousEvents(previous);
 
-        console.log(upcoming);
-        console.log(previous);
       } else {
         console.error("Error fetching events:", error);
       }

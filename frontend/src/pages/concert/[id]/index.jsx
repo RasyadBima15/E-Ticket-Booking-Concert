@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import ModalLogout from "@/components/ModalLogout";
 import concertApi from "@/api/modules/concerts.api";
 import ticketApi from "@/api/modules/tickets.api";
+import bandApi from "@/api/modules/bands.api";
 
 export default function Concert() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Concert() {
   const [concert, setConcert] = useState(null);
   const [imageConcert, setImageConcert] = useState(null);
   const [ticketPrice, setTicketPrice] = useState(null)
+  const [bands, setBands] = useState([])
   const { id } = router.query;
 
   useEffect(() => {
@@ -46,11 +48,23 @@ export default function Concert() {
             setTicketPrice(response.price)
           }
         } catch (error) {
-          console.error("Error fetching concert:", error);
+          console.error("Error fetching ticket:", error);
+        }
+      }
+      const fetchBand = async () => {
+        try {
+          const { response, error } = await bandApi.getBandByConcert(id);
+          console.log(response);
+          if(response){
+            setBands(response)
+          }
+        } catch (error) {
+          console.error("Error fetching band:", error);
         }
       }
       fetchConcert();
       fetchTicket();
+      fetchBand();
     }
   }, [router, id]);
 
@@ -132,13 +146,20 @@ export default function Concert() {
           </div>
           <div className="lg:col-span-1">
             <h2 className="text-2xl font-bold text-purple-800 mb-4">List Band</h2>
-            <div className="space-y-4">
-              {/* Example Band Item */}
-                <div className="bg-white shadow-md rounded overflow-hidden w-52">
-                    <img src="/images/band1.png" alt="Band" className="w-full h-32 object-cover" />
-                    <div className="p-2 text-center font-bold">BTS</div>
+            <div className="flex flex-wrap gap-10">
+              {bands.map((band, index) => (
+                <div key={index} className="bg-white border border-gray-200 shadow-lg rounded-lg overflow-hidden w-52 flex-shrink-0">
+                  <img
+                    src={band.image_band.replace(
+                      'C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public',
+                      ''
+                    ).replace(/\\/g, '/')}
+                    alt="Band"
+                    className="w-full h-32 object-cover"
+                  />
+                  <div className="p-2 text-center font-bold">{band.name}</div>
                 </div>
-              {/* Add more band items as needed */}
+              ))}
             </div>
           </div>
         </div>

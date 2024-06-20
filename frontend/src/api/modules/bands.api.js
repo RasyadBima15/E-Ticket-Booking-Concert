@@ -35,7 +35,7 @@ const bandApi = {
             return {error}
         }
     },
-    getBandByConcert: async ({concertId}) => {
+    getBandByConcert: async (concertId) => {
         try {
             const response = await publicClient.get(bandEndPoint.getBandByConcert({concertId}));
             return { response };

@@ -209,7 +209,6 @@ def get_band(band_id):
 
 # Rute untuk mengambil data band berdasarkan IdConcert tertentu
 @app.route('/band/concert/<int:concert_id>', methods=['GET'])
-@jwt_required()
 def get_band_by_concert(concert_id):
     try:
         bands = Band.query.filter_by(IdConcert=concert_id).all()
