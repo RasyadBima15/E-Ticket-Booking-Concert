@@ -15,8 +15,9 @@ export default function buy() {
         if (!token) {
           router.push('/login')
         } else if (role == "Admin"){
-          setIsLoggedIn(true)
           router.push('/admin/concerts')
+        } else if (token){
+          setIsLoggedIn(true)
         }
     }, [router]);
 
@@ -35,6 +36,22 @@ export default function buy() {
           <div className="text-2xl text-purple-800 font-bold">E-Ticket Booking Concert</div>
         </div>
         <div>
+        {!isLoggedIn ? (
+          <>
+          <button
+            className="bg-transparent text-purple-800 border border-purple-800 py-2 px-4 rounded mr-4"
+            onClick={() => router.push('/login')}
+          >
+            Login
+          </button>
+          <button
+            className="bg-purple-800 text-white py-2 px-4 rounded"
+            onClick={() => router.push('/register')}
+          >
+            Register
+          </button>
+        </>
+        ):(
           <>
               <button
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
@@ -46,6 +63,7 @@ export default function buy() {
                 <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout}/>
               )}
           </>
+        )}
         </div>
       </header>
 

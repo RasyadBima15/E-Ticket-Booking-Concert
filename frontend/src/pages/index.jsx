@@ -3,18 +3,69 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import ModalLogout from "@/components/ModalLogout";
+import concertApi from "@/api/modules/concerts.api";
 
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [previousEvents, setPreviousEvents] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
-    } 
+    }
+    const fetchEvents = async () => {
+      const { response, error } = await concertApi.getAllConcerts();
+      if (response) {
+        const events = response;
+
+        const now = new Date();
+        const upcoming = events.filter(event => new Date(event.start_date) > now);
+        const previous = events.filter(event => new Date(event.start_date) <= now);
+
+        setUpcomingEvents(upcoming);
+        setPreviousEvents(previous);
+
+        console.log(upcoming);
+        console.log(previous);
+      } else {
+        console.error("Error fetching events:", error);
+      }
+    };
+    fetchEvents(); 
   }, [router]);
+
+  const formatDateRange = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const months = [
+        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+    ];
+
+    const formattedStartDate = `${months[start.getMonth()]} ${start.getDate()}-${end.getDate()}`;
+
+    return formattedStartDate.toUpperCase();
+  };
+
+  const truncateDescription = (description) => {
+    if (description.length > 120) {
+        return `${description.slice(0, 120)}...`;
+    }
+    return description;
+  };
+
+  const handleEventClick = (eventId) => {
+    if(isLoggedIn){
+      router.push(`/concert/detailbuy/${eventId}`);
+    } else {
+      router.push(`/concert/${eventId}`);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -84,18 +135,22 @@ export default function Home() {
       <section className="py-16 px-8 relative z-10">
         <h2 className="text-3xl font-bold text-center mb-8">Upcoming Events</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Example Event Card */}
-          <div className="bg-white shadow-md rounded overflow-hidden">
-            <img src="/images/concert1.png" alt="Event" className="w-full h-48 object-cover" />
+          {upcomingEvents.map(event => (
+            <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden" onClick={() => handleEventClick(event.concert_id)}>
+            <img
+                src={`${event.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')}`}
+                alt="Event"
+                className="w-full h-48 object-center"
+              />
             <div className="p-4">
-              <div className="text-sm text-gray-500">APR 14-16</div>
-              <h3 className="text-xl font-bold">Event Name</h3>
+              <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
+              <h3 className="text-xl font-bold">{event.nama}</h3>
               <p className="mt-2 text-gray-700">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                {truncateDescription(event.deskripsi)}
               </p>
             </div>
           </div>
-          {/* Add more event cards as needed */}
+          ))}
         </div>
       </section>
 
@@ -103,17 +158,18 @@ export default function Home() {
       <section className="py-16 px-8 bg-gray-100 relative z-10">
         <h2 className="text-3xl font-bold text-center mb-8">Previous Events</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Example Previous Event Card */}
-          <div className="bg-white shadow-md rounded overflow-hidden">
-            <img src="/images/concert2.png" alt="Event" className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <h3 className="text-xl font-bold">Event Name</h3>
-              <p className="mt-2 text-gray-700">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
-            </div>
+        {previousEvents.map(event => (
+          <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden" onClick={() => handleEventClick(event.concert_id)}>
+          <img src={`${event.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')}`} alt="Event" className="w-full h-48 object-center" />
+          <div className="p-4">
+            <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
+            <h3 className="text-xl font-bold">{event.nama}</h3>
+            <p className="mt-2 text-gray-700">
+              {truncateDescription(event.deskripsi)}
+            </p>
           </div>
-          {/* Add more previous event cards as needed */}
+        </div>
+        ))}
         </div>
       </section>
 

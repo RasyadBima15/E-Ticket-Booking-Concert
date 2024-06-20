@@ -348,13 +348,9 @@ def create_concert():
         return jsonify({'message': f'Failed to create concert. Error: {str(e)}'}), 500
 
 @app.route('/concert/<int:concert_id>', methods=['GET'])
-@jwt_required()
 def get_concert(concert_id):
-    if current_user.Role == "User":
-        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
         concert = Concert.query.get(concert_id)
-        print(concert)
         if not concert:
             return jsonify({'message': 'Concert not found'}), 404
 
@@ -373,7 +369,6 @@ def get_concert(concert_id):
 
 # Rute untuk melihat semua concert
 @app.route('/concerts', methods=['GET'])
-@jwt_required()
 def get_all_concerts():
     try:
         concerts = Concert.query.all()
@@ -554,24 +549,20 @@ def get_all_tickets():
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
 
 @app.route('/ticket/concert/<int:concert_id>', methods=['GET'])
-@jwt_required()
 def get_tickets_by_concert(concert_id):
-    if current_user.Role == "User":
-        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
     try:
-        tickets = Ticket.query.filter_by(IdConcert=concert_id).all()
+        ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum').first()
 
-        if not tickets:
+        if not ticket:
             return jsonify({'message': 'No tickets found for this concert'}), 404
 
-        tickets_data = []
-        for ticket in tickets:
-            ticket_dict = ticket.as_dict()
-            tickets_data.append(ticket_dict)
-
-        return jsonify(tickets_data), 200
+        return jsonify({
+            'ticket_id': ticket.IdTicket,
+            'price': ticket.Price
+        }), 200
 
     except Exception as e:
+        print(e)
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
     
 # Update Ticket Status if the User has purchased a ticket  

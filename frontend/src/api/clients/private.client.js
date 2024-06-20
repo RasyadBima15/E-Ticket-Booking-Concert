@@ -10,14 +10,11 @@ const privateClient = axios.create({
 
 privateClient.interceptors.request.use(async (config) => {
     const token = localStorage.getItem("token");
-    return {
-        ...config,
-        headers: {
-            ...config.headers,
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`
-        },
-    };
+    if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    config.headers["Content-Type"] = "multipart/form-data";
+    return config;
 });
 
 privateClient.interceptors.response.use((response) => {

@@ -92,13 +92,13 @@ export default function Concerts() {
             <tbody>
               {concerts.map((concert, index) => (
                 <tr key={index} className="bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2">{concert.nama}</td>
-                  <td className="border border-gray-300 px-4 py-2">{concert.lokasi}</td>
-                  <td className="border border-gray-300 px-4 py-2">{new Date(concert.start_date).toLocaleDateString()}</td>
-                  <td className="border border-gray-300 px-4 py-2">{new Date(concert.end_date).toLocaleDateString()}</td>
-                  <td className="border border-gray-300 px-4 py-2">{concert.total_ticket}</td>
-                  <td className="border border-gray-300 px-4 py-2">{concert.deskripsi}</td>
-                  <td className="border border-gray-300 px-4 py-2 flex justify-center">
+                  <td className="border border-gray-300 px-3 py-2">{concert.nama}</td>
+                  <td className="border border-gray-300 px-3 py-2">{concert.lokasi}</td>
+                  <td className="border border-gray-300 px-3 py-2">{new Date(concert.start_date).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-3 py-2">{new Date(concert.end_date).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-3 py-2">{concert.total_ticket}</td>
+                  <td className="border border-gray-300 px-3 py-2">{concert.deskripsi}</td>
+                  <td className="border border-gray-300 px-3 py-2 text-center">
                     <button onClick={() => handleEdit(concert.concert_id)} className="mr-5 text-green-600">
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
