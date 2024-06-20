@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const Sidebar = ({ setShowModal }) => {
     return (
-        <aside className="w-1/5 bg-purple-800 text-white p-8 h-screen fixed">
+        <aside className="w-1/5 bg-purple-800 text-white p-8 h-screen fixed" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
             <h2 className="text-2xl font-bold mb-8">ADMIN DASHBOARD</h2>
             <nav>
                 <ul>

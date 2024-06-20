@@ -71,9 +71,9 @@ export default function Login() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0 min-h-screen bg-gray-100">
         {/* Bagian Kiri (Logo dan Selamat Datang) */}
         <div className="flex items-center justify-center p-9 bg-cover bg-center rounded shadow-md" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
-            <div className="text-center text-white">
-                <img src="/images/logohd.png" alt="Logo" className="w-3/4 mb-4 mx-auto" />
-                <p className="text-700 mt-2">Masukkan username dan password untuk melanjutkan.</p>
+            <div className="flex items-center text-white">
+                <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
+                <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
             </div>
         </div>
         {/* Bagian Kanan (Form Login) */}
