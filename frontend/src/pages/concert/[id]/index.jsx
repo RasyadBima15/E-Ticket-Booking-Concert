@@ -6,6 +6,7 @@ import ModalLogout from "@/components/ModalLogout";
 import concertApi from "@/api/modules/concerts.api";
 import ticketApi from "@/api/modules/tickets.api";
 import bandApi from "@/api/modules/bands.api";
+import ModalLogin from "@/components/ModalLogin";
 
 export default function Concert() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Concert() {
   const [ticketPrice, setTicketPrice] = useState(null)
   const [bands, setBands] = useState([])
   const [isEventClosed, setIsEventClosed] = useState([])
+  const [showModalLogin, setShowModalLogin] = useState(false);
   const { id } = router.query;
 
   useEffect(() => {
@@ -98,6 +100,10 @@ export default function Concert() {
     setShowModal(false);
   };
 
+  const handleLogin = async () => {
+    router.push('/login')
+  }
+
   return (
     <div className="bg-white text-gray-900">
       {/* Header */}
@@ -165,33 +171,31 @@ export default function Concert() {
             </div>
           </div>
         </div>
-
         <div className="mt-8">
-        <div className="flex space-x-20">
-            <div>
-                <h2 className="text-2xl font-bold text-purple-800 mb-6">Event Information</h2>
-                <div className="flex items-center mb-4">
-                  <img src="/images/logos/location.png" alt="Logo" className="w-6 h-6 mr-2" />
-                  <div className="font-medium">{concert.lokasi}</div>
-                </div>
-                <div className="flex items-center">
-                  <img src="/images/logos/alarm.png" alt="Logo" className="w-6 h-6 mr-2" />
-                  <div className="font-medium">{formatDateRange(concert.start_date, concert.end_date)}</div>
-                </div>
-            </div>
-            <div className="flex flex-col items-center border border-gray-300 py-4 px-6 rounded">
-                <div className="font-medium text-center mb-2">Fees Starting At:</div>
-                <div className="text-purple-800 text-center font-bold mb-4">{formatRupiah(ticketPrice)}</div>
-                <button
-                  className={`py-2 px-4 rounded w-full ${isEventClosed ? 'bg-gray-500 text-white' : 'bg-purple-800 text-white'}`}
-                  disabled={isEventClosed}
-                  >
-                  {isEventClosed ? 'Closed' : 'Order Now'}
-                </button>
-            </div>
-        </div>
-
-
+          <div className="flex space-x-20">
+              <div>
+                  <h2 className="text-2xl font-bold text-purple-800 mb-6">Event Information</h2>
+                  <div className="flex items-center mb-4">
+                    <img src="/images/logos/location.png" alt="Logo" className="w-6 h-6 mr-2" />
+                    <div className="font-medium">{concert.lokasi}</div>
+                  </div>
+                  <div className="flex items-center">
+                    <img src="/images/logos/alarm.png" alt="Logo" className="w-6 h-6 mr-2" />
+                    <div className="font-medium">{formatDateRange(concert.start_date, concert.end_date)}</div>
+                  </div>
+              </div>
+              <div className="flex flex-col items-center border border-gray-300 py-4 px-6 rounded">
+                  <div className="font-medium text-center mb-2">Fees Starting At:</div>
+                  <div className="text-purple-800 text-center font-bold mb-4">{formatRupiah(ticketPrice)}</div>
+                  <button
+                    className={`py-2 px-4 rounded w-full ${isEventClosed ? 'bg-gray-500 text-white' : 'bg-purple-800 text-white'}`}
+                    disabled={isEventClosed}
+                    onClick={() => setShowModalLogin(true)}
+                    >
+                    {isEventClosed ? 'Closed' : 'Order Now'}
+                  </button>
+              </div>
+          </div>
           <div className="mt-8">
             <h2 className="text-2xl font-bold text-purple-800 mb-4">Deskripsi</h2>
             <p className="text-gray-700">
@@ -201,6 +205,9 @@ export default function Concert() {
         </div>
         </section>
       )}  
+      {showModalLogin && (
+        <ModalLogin setShowModalLogin={setShowModalLogin} handleLogin={handleLogin}/>
+      )}
     </div>
   );
 }
