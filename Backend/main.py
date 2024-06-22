@@ -15,7 +15,7 @@ CORS(app, origins="http://localhost:3000")
 UPLOAD_CONCERT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images', 'concerts')
 UPLOAD_BAND = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'public', 'images', 'bands')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3308/e-ticket-concert'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/e-ticket-concert'
 app.config['JWT_SECRET_KEY'] = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
 app.config['UPLOAD_CONCERT'] = UPLOAD_CONCERT
