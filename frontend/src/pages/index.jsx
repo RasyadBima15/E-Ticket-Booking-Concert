@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import ModalLogout from "@/components/ModalLogout";
 import concertApi from "@/api/modules/concerts.api";
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 export default function Home() {
   const router = useRouter();
@@ -11,6 +12,11 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [previousEvents, setPreviousEvents] = useState([]);
+  const [latestEvents, setLatestEvents] = useState([]);
+
+  const handleLogoClick = () => {
+    router.push('/');
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,6 +35,9 @@ export default function Home() {
         setUpcomingEvents(upcoming);
         setPreviousEvents(previous);
 
+        // Get the latest two events
+        const sortedUpcoming = upcoming.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+        setLatestEvents(sortedUpcoming.slice(0, 2));
       } else {
         console.error("Error fetching events:", error);
       }
@@ -77,7 +86,7 @@ export default function Home() {
     <div className="bg-white text-gray-900">
       {/* Header */}
       <header className="bg-gradient-to-r from-purple-800 to-purple-600 text-white p-6 border-b border-x-gray-50 flex justify-between items-center relative z-20">
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer"  onClick={handleLogoClick}>
           <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
           <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
         </div>
@@ -114,7 +123,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-800 to-purple-600 text-white py-14 text-center relative z-10">
+      {/* <section className="bg-gradient-to-r from-purple-800 to-purple-600 text-white py-14 text-center relative z-10">
         <div className="relative z-10">
           <h1 className="text-5xl font-bold">Lorem Ipsum</h1>
           <p className="mt-4 text-xl max-w-2xl mx-auto">
@@ -127,14 +136,38 @@ export default function Home() {
             Get Ticket
           </button>
         </div>
-      </section>
+      </section> */}
+
+      {/* Carousel for Latest Events */}
+      <section className="relative z-10">
+            <Carousel showThumbs={false} autoPlay interval={3000} infiniteLoop>
+            {latestEvents.map(event => (
+            <div key={event.concert_id} className="relative cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
+            <img
+              // src={`${event.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')}`}
+              src = "/images/bands/russ.jpg" //ganti gambarnya pakai yang di database saya sa nda bisa akses
+              alt="Image Alt Text"
+              className="w-full h-3/4 object-cover filter blur-sm"
+            />
+            <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 p-4 text-white">
+              <h2 className="relative cursor-pointer transform hover:scale-105 transition duration-300 text-9xl font-bold text-center mb-8">{event.nama}</h2>
+              <div className="text-lg text-gray-200">{formatDateRange(event.start_date, event.end_date)}</div>
+              <p className="mt-2 text-gray-300">
+            {truncateDescription(event.deskripsi)}
+          </p>
+         </div>
+        </div>
+        ))}
+          </Carousel>
+    </section>
+
 
       {/* Upcoming Events Section */}
       <section className="py-16 px-8 relative z-10">
         <h2 className="text-3xl font-bold text-center mb-8">Upcoming Events</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {upcomingEvents.map(event => (
-            <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden" onClick={() => handleEventClick(event.concert_id)}>
+            <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
             <img
                 src={`${event.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')}`}
                 alt="Event"
@@ -157,7 +190,7 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-8">Previous Events</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {previousEvents.map(event => (
-          <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden" onClick={() => handleEventClick(event.concert_id)}>
+          <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
           <img src={`${event.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')}`} alt="Event" className="w-full h-48 object-center" />
           <div className="p-4">
             <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>

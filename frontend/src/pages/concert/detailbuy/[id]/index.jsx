@@ -17,6 +17,9 @@ export default function buy() {
     const [ticketPriceVIP, setTicketPriceVIP] = useState(null)
     const [bands, setBands] = useState([])
     const { id } = router.query;
+    const handleLogoClick = () => {
+      router.push('/');
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -104,7 +107,7 @@ export default function buy() {
       <div className="bg-white text-gray-900">
       {/* Header */}
       <header className="flex justify-between items-center p-6 bg-white border-b border-gray-200">
-      <div className="flex items-center">
+      <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img src="/images/logos/logo2.png" alt="Logo" className="w-7 h-7 mr-2" />
           <div className="text-2xl text-purple-800 font-bold">E-Ticket Booking Concert</div>
         </div>

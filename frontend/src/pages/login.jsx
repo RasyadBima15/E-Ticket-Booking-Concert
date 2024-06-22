@@ -20,6 +20,9 @@ export default function Login() {
             }
         }
     }, [router]);
+    const handleLogoClick = () => {
+            router.push('/');
+    };
 
     const loginForm = useFormik({
         initialValues: {
@@ -71,7 +74,7 @@ export default function Login() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0 min-h-screen bg-gray-100">
         {/* Bagian Kiri (Logo dan Selamat Datang) */}
         <div className="flex items-center justify-center p-9 bg-cover bg-center rounded shadow-md" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
-            <div className="flex items-center text-white">
+            <div className="flex items-center text-white cursor-pointer" onClick={handleLogoClick}>
                 <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
                 <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
             </div>
@@ -123,6 +126,15 @@ export default function Login() {
                             {isOnRequest ? "Go to the homepage..." : "Login"}
                         </button>
                     </div>
+                    <div className="mt-4 text-sm text-center">
+                            Belum punya akun?{" "}
+                            <button
+                                onClick={() => router.push('/register')} // Ganti '/register' dengan path ke halaman registrasi
+                                className="text-purple-600 hover:underline focus:outline-none"
+                            >
+                                Daftar sekarang
+                            </button>
+                        </div>
                 </form>
             </div>
         </div>

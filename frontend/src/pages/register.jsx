@@ -21,6 +21,9 @@ export default function Register() {
             }
         }
     }, [router]);
+    const handleLogoClick = () => {
+        router.push('/');
+    };
 
     const registerForm = useFormik({
         initialValues: {
@@ -68,7 +71,7 @@ export default function Register() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0 min-h-screen bg-gray-100">
         {/* Bagian Kiri (Logo dan Selamat Datang) */}
         <div className="flex items-center justify-center p-9 bg-cover bg-center rounded shadow-md" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
-            <div className="flex items-center text-white">
+            <div className="flex items-center text-white cursor-pointer" onClick={handleLogoClick}>
                 <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
                 <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
             </div>
@@ -136,6 +139,15 @@ export default function Register() {
                 {isOnRequest ? "Registering..." : "Register"}
                 </button>
             </div>
+            <div className="mt-4 text-sm text-center">
+                            Sudah punya akun?{" "}
+                            <button
+                                onClick={() => router.push('/login')} 
+                                className="text-purple-600 hover:underline focus:outline-none"
+                            >
+                                Masuk Ke halaman login
+                            </button>
+                        </div>
             </form>
         </div>
         </div>
