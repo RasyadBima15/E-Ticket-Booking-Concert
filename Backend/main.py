@@ -81,7 +81,8 @@ def check_email_user(user_id):
         if user.Email:
             return jsonify({
                 'message': 'Email user sudah ada',
-                'email': user.Email
+                'email': user.Email,
+                'username': user.Username
             }), 200
         else:
             return jsonify({'message': 'Email user tidak ditemukan'}), 404
