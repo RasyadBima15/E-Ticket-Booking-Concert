@@ -209,7 +209,10 @@ export default function Home() {
               <h3 className="text-2xl font-bold">E-Ticket Booking Concert</h3>
             </div>
             <p className="mt-5 max-w-lg mx-auto">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            E-Ticket-Booking-Concert adalah aplikasi 
+            yang menyediakan layanan pemesanan tiket konser secara online,
+            Sejak berdiri pada tahun 2010, kami telah melayani jutaan pengguna di seluruh 
+            Indonesia dengan berbagai pilihan konser dari artis lokal hingga internasional. 
             </p>
           </div>
           <div className="text-sm">
