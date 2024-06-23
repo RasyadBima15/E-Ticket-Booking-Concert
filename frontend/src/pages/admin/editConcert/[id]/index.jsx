@@ -39,6 +39,7 @@ export default function editConcert() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
+        localStorage.removeItem('idUser');
         router.push('/login');
         setShowModal(false);
     };

@@ -16,7 +16,7 @@ export default function Concert() {
   const [imageConcert, setImageConcert] = useState(null);
   const [ticketPrice, setTicketPrice] = useState(null)
   const [bands, setBands] = useState([])
-  const [isEventClosed, setIsEventClosed] = useState([])
+  const [isEventClosed, setIsEventClosed] = useState(false)
   const [showModalLogin, setShowModalLogin] = useState(false);
   const { id } = router.query;
 
@@ -48,8 +48,9 @@ export default function Concert() {
       const fetchTicket = async () => {
         try {
           const { response, error } = await ticketApi.getTicketsByConcert(id);
+          console.log(response);
           if(response){
-            setTicketPrice(response.price)
+            setTicketPrice(response.umum_ticket.price)
           }
         } catch (error) {
           console.error("Error fetching ticket:", error);
@@ -58,7 +59,6 @@ export default function Concert() {
       const fetchBand = async () => {
         try {
           const { response, error } = await bandApi.getBandByConcert(id);
-          console.log(response);
           if(response){
             setBands(response)
           }
@@ -96,13 +96,10 @@ export default function Concert() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('idUser');
     router.push('/login');
     setShowModal(false);
   };
-
-  const handleLogin = async () => {
-    router.push('/login')
-  }
 
   return (
     <div className="bg-white text-gray-900">
@@ -188,7 +185,7 @@ export default function Concert() {
                   <div className="font-medium text-center mb-2">Fees Starting At:</div>
                   <div className="text-purple-800 text-center font-bold mb-4">{formatRupiah(ticketPrice)}</div>
                   <button
-                    className={`py-2 px-4 rounded w-full ${isEventClosed ? 'bg-gray-500 text-white' : 'bg-purple-800 text-white'}`}
+                    className={`py-2 px-4 rounded w-full ${isEventClosed ? 'bg-gray-500 text-white cursor-not-allowed' : 'bg-purple-800 text-white'}`}
                     disabled={isEventClosed}
                     onClick={() => setShowModalLogin(true)}
                     >
@@ -206,7 +203,7 @@ export default function Concert() {
         </section>
       )}  
       {showModalLogin && (
-        <ModalLogin setShowModalLogin={setShowModalLogin} handleLogin={handleLogin}/>
+        <ModalLogin setShowModalLogin={setShowModalLogin}/>
       )}
     </div>
   );

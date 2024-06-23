@@ -5,6 +5,7 @@ const userEndPoint = {
     loginUser: '/login',
     registerUser: '/register',
     updateUser: ({userId}) => `/user/${userId}`,
+    checkEmailUser: ({userId}) => `/user/${userId}`,
     getAllUsers: '/users',
 }
 
@@ -32,14 +33,9 @@ const userApi = {
             return {error}
         }
     },
-    updateUser: async ({userId}, {Fullname, Email, NoTelp, Gender}) => {
+    updateUser: async (userId, formData) => {
         try {
-            const response = await privateClient.put(userEndPoint.updateUser({ userId }), {
-                Fullname, 
-                Email,
-                NoTelp,
-                Gender,
-            });
+            const response = await privateClient.put(userEndPoint.updateUser({ userId }), formData);
             return { response };
         } catch (error) {
             return {error}
@@ -53,6 +49,14 @@ const userApi = {
             return {error}
         }
     },
+    checkEmailUser: async (userId) => {
+        try {
+            const response = await privateClient.get(userEndPoint.checkEmailUser({userId}));
+            return { response };
+        } catch (error) {
+            return {error}
+        }
+    }
 }
 
 export default userApi;

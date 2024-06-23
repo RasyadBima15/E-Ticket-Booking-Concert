@@ -55,6 +55,7 @@ export default function editBand() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
+        localStorage.removeItem('idUser');
         router.push('/login');
         setShowModal(false);
     };

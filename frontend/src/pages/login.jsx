@@ -49,12 +49,12 @@ export default function Login() {
                     loginForm.resetForm()
                     localStorage.setItem("token", response.access_token);
                     localStorage.setItem("role", response.role);
+                    localStorage.setItem("idUser", response.idUser);
 
                     if (response.role === "Admin"){
                         console.log("test for admin");
                         router.push('/admin/concerts');  
                     } else if (response.role === "User"){
-                        console.log("test");
                         router.push('/');  
                     }
                 }
@@ -66,7 +66,12 @@ export default function Login() {
             }
             setIsOnRequest(false)
         }
-    })
+    });
+
+    const handleRegisterClick = () => {
+        router.push('/register')
+    };
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0 min-h-screen bg-gray-100">
         {/* Bagian Kiri (Logo dan Selamat Datang) */}
@@ -124,6 +129,15 @@ export default function Login() {
                         </button>
                     </div>
                 </form>
+                <p className="text-sm text-gray-700 font-medium mt-4">
+                    Belum punya akun?{" "}
+                    <span
+                        className="text-purple-600 cursor-pointer"
+                        onClick={handleRegisterClick}
+                    >
+                        Register disini
+                    </span>
+                </p>
             </div>
         </div>
     </div>

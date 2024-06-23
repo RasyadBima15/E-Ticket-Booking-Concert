@@ -66,9 +66,28 @@ def login_user():
 
     if user and check_password_hash(user.Password, password):
         access_token = create_access_token(identity=username)
-        return jsonify({'message': 'Login successful', 'access_token': access_token, 'role': user.Role}), 200
+        return jsonify({'message': 'Login successful', 'access_token': access_token, 'role': user.Role, 'idUser': user.idUser}), 200
     else:
         return jsonify({'message': 'Invalid username or password'}), 401  
+    
+@app.route('/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def check_email_user(user_id):
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        if user.Email:
+            return jsonify({
+                'message': 'Email user sudah ada',
+                'email': user.Email
+            }), 200
+        else:
+            return jsonify({'message': 'Email user tidak ditemukan'}), 404
+
+    except Exception as e:
+        return jsonify({'message': f'Failed to retrieve Email User. Error: {str(e)}'}), 500
 
 # Update the user's identity when filling out the order form
 @app.route('/user/<int:user_id>', methods=['PUT'])
@@ -77,7 +96,7 @@ def update_user(user_id):
     if current_user.Role == "Admin":
         return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         new_fullname = data.get('Fullname')
         new_email = data.get('Email')
         new_phone_number = data.get('NoTelp')
@@ -88,6 +107,11 @@ def update_user(user_id):
         if not user:
             return jsonify({'message': 'User not found'}), 404
 
+        if new_email:
+            existing_user = User.query.filter_by(Email=new_email).first()
+            if existing_user and existing_user.idUser != user_id:
+                return jsonify({'message': 'Email sudah digunakan oleh user lain'}), 400
+        
         if new_fullname:
             user.Fullname = new_fullname
         if new_email:
@@ -104,6 +128,7 @@ def update_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': f'Failed to update user. Error: {str(e)}'}), 500
+
     
 # Rute untuk melihat semua user
 @app.route('/users', methods=['GET'])
@@ -189,8 +214,8 @@ def get_all_bands():
 @app.route('/band/<int:band_id>', methods=['GET'])
 @jwt_required()
 def get_band(band_id):
-    if current_user.Role == "User":
-        return jsonify({'message': 'Hanya Admin yang bisa mengakses endpoint ini!'}), 404
+    if current_user.Role == "Admin":
+        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         band = Band.query.get(band_id)
 
@@ -550,44 +575,39 @@ def get_all_tickets():
 @app.route('/ticket/concert/<int:concert_id>', methods=['GET'])
 def get_tickets_by_concert(concert_id):
     try:
-        ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum').first()
+        umum_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum').first()
+        vip_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='VIP').first()
 
-        if not ticket:
+        available_ticket_umum_count = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum', Status='Available').count()
+        available_ticket_vip_count = Ticket.query.filter_by(IdConcert=concert_id, TicketType='VIP', Status='Available').count()
+
+        available_umum = available_ticket_umum_count > 0
+        available_vip = available_ticket_vip_count > 0
+
+        if not umum_ticket and not vip_ticket:
             return jsonify({'message': 'No tickets found for this concert'}), 404
 
-        return jsonify({
-            'ticket_id': ticket.IdTicket,
-            'price': ticket.Price
-        }), 200
+        response_data = {}
+
+        if umum_ticket:
+            response_data['umum_ticket'] = {
+                'ticket_id': umum_ticket.IdTicket,
+                'price': umum_ticket.Price,
+                'available': available_umum
+            }
+
+        if vip_ticket:
+            response_data['vip_ticket'] = {
+                'ticket_id': vip_ticket.IdTicket,
+                'price': vip_ticket.Price,
+                'available': available_vip
+            }
+
+        return jsonify(response_data), 200
 
     except Exception as e:
         print(e)
         return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
-    
-# Update Ticket Status if the User has purchased a ticket  
-# @app.route('/ticket/<int:ticket_id>', methods=['PUT'])
-# @jwt_required()
-# def update_ticket(ticket_id):
-#     if current_user.Role == "Admin":
-#         return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
-#     try:
-#         data = request.json
-#         new_status = data.get('Status')
-
-#         ticket = Ticket.query.get(ticket_id)
-
-#         if not ticket:
-#             return jsonify({'message': 'Ticket not found'}), 404
-
-#         ticket.Status = new_status
-
-#         db.session.commit()
-
-#         return jsonify({'message': 'Ticket status updated successfully'}), 200
-
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'message': f'Failed to update ticket status. Error: {str(e)}'}), 
 
 # Create proof of payment
 @app.route('/payment', methods=['POST'])

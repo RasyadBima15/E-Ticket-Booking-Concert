@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '@/components/Sidebar'
-import ModalLogout from "@/components/ModalLogout";
+import ModalLogout from '@/components/ModalLogout';
 import Image from 'next/image';
 import bandApi from '@/api/modules/bands.api';
 import ModalDelete from '@/components/ModalDelete';
@@ -44,6 +44,7 @@ export default function bands() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('idUser');
     router.push('/login');
     setShowModal(false);
   };

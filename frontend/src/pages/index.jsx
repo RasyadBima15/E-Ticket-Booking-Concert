@@ -11,11 +11,14 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [previousEvents, setPreviousEvents] = useState([]);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     if (token) {
       setIsLoggedIn(true);
+      setRole(role);
     }
     const fetchEvents = async () => {
       const { response, error } = await concertApi.getAllConcerts();
@@ -58,8 +61,10 @@ export default function Home() {
   };
 
   const handleEventClick = (eventId) => {
-    if(isLoggedIn){
+    if(isLoggedIn && role === 'User'){
       router.push(`/concert/detailbuy/${eventId}`);
+    } else if (role === 'Admin') {
+      router.push(`/concert/${eventId}`);
     } else {
       router.push(`/concert/${eventId}`);
     }
@@ -68,6 +73,7 @@ export default function Home() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('idUser');
     setIsLoggedIn(false);
     setShowModal(false);
     router.push('/login');
