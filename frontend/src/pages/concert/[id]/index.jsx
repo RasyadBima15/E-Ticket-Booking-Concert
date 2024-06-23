@@ -92,7 +92,9 @@ export default function Concert() {
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
   };
-  
+  const handleLogoClick = () => {
+    router.push('/');
+  };
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -108,7 +110,7 @@ export default function Concert() {
     <div className="bg-white text-gray-900">
       {/* Header */}
       <header className="flex justify-between items-center p-6 bg-white border-b border-gray-200">
-      <div className="flex items-center">
+      <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img src="/images/logos/logo2.png" alt="Logo" className="w-7 h-7 mr-2" />
           <div className="text-2xl text-purple-800 font-bold">E-Ticket Booking Concert</div>
         </div>
