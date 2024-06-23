@@ -27,28 +27,30 @@ export default function editBand() {
         } else if (role == "User"){
         router.push('/')
         } else {
-            const fetchBand = async () => {
-                const { response } = await bandApi.getBand(id);
-                if (response) {
-                  setBand(response);
-                  setExistingImage(response.image_band.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/'));
-                }
-            };
-            const fetchConcerts = async () => {
-                try {
-                    const { response } = await concertApi.getAllConcerts();
-                    // console.log("response:", response);
-                    // console.log("error:", error.data);
+            if(id){
+                const fetchBand = async () => {
+                    const { response, error } = await bandApi.getBand(id);
                     if (response) {
-                        setConcerts(response);
-                        // console.log(concerts);
+                      setBand(response);
+                      setExistingImage(response.image_band);
                     }
-                } catch (error) {
-                    setErrorMessage('Failed to fetch concerts');
-                }
-            };
-            fetchConcerts();
-            fetchBand();
+                };
+                const fetchConcerts = async () => {
+                    try {
+                        const { response } = await concertApi.getAllConcerts();
+                        // console.log("response:", response);
+                        // console.log("error:", error.data);
+                        if (response) {
+                            setConcerts(response);
+                            // console.log(concerts);
+                        }
+                    } catch (error) {
+                        setErrorMessage('Failed to fetch concerts');
+                    }
+                };
+                fetchConcerts();
+                fetchBand();
+            }  
         }
     }, [router, id]);
 

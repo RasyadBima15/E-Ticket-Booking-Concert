@@ -78,7 +78,7 @@ export default function Login() {
         <div className="flex items-center justify-center p-9 bg-cover bg-center rounded shadow-md" style={{ backgroundImage: `url('/images/bg_login.png')` }}>
             <div className="flex items-center text-white">
                 <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
-                <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
+                <div className="text-2xl font-bold select-none">E-Ticket Booking Concert</div>
             </div>
         </div>
         {/* Bagian Kanan (Form Login) */}
@@ -132,7 +132,7 @@ export default function Login() {
                 <p className="text-sm text-gray-700 font-medium mt-4">
                     Belum punya akun?{" "}
                     <span
-                        className="text-purple-600 cursor-pointer"
+                        className="text-purple-600 hover:underline focus:outline-none cursor-pointer"
                         onClick={handleRegisterClick}
                     >
                         Register disini

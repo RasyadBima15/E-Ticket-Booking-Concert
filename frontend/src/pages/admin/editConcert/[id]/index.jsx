@@ -29,7 +29,7 @@ export default function editConcert() {
               const { response } = await concertApi.getConcert(id);
               if (response) {
                 setConcert(response);
-                setExistingImage(response.image_concert.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/'));
+                setExistingImage(response.image_concert);
               }
             };
             fetchConcert();

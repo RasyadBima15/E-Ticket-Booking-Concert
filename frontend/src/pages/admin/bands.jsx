@@ -109,7 +109,7 @@ export default function bands() {
                   <td className="border border-gray-300 px-4 py-2 text-center">{band.Name}</td>
                   <td className="border border-gray-300 px-4 py-2 text-center">{getConcertNameById(band.IdConcert)}</td>
                   <td className="border border-gray-300 px-4 py-2 flex justify-center items-center">
-                    <Image src={band.ImageBand.replace('C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public', '').replace(/\\/g, '/')} alt="Deskripsi gambar" width="100" height="100"/>
+                    <Image src={band.ImageBand} alt="Deskripsi gambar" width="100" height="100"/>
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">
                     <button onClick={() => handleEdit(band.IdBand)} className="mr-5 text-green-600">

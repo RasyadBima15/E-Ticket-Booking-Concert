@@ -31,14 +31,7 @@ export default function Concert() {
           const { response } = await concertApi.getConcert(id);
           if (response) {
             setConcert(response);
-            setImageConcert(
-              response.image_concert
-                .replace(
-                  'C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public',
-                  ''
-                )
-                .replace(/\\/g, '/')
-            );
+            setImageConcert(response.image_concert);
             setIsEventClosed(new Date(response.start_date) < new Date());
           }
         } catch (error) {
@@ -93,6 +86,10 @@ export default function Concert() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
   };
   
+  const handleLogoClick = () => {
+    router.push('/');
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -105,7 +102,7 @@ export default function Concert() {
     <div className="bg-white text-gray-900">
       {/* Header */}
       <header className="flex justify-between items-center p-6 bg-white border-b border-gray-200">
-      <div className="flex items-center">
+      <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img src="/images/logos/logo2.png" alt="Logo" className="w-7 h-7 mr-2" />
           <div className="text-2xl text-purple-800 font-bold">E-Ticket Booking Concert</div>
         </div>
@@ -155,10 +152,7 @@ export default function Concert() {
               {bands.map((band, index) => (
                 <div key={index} className="bg-white border border-gray-200 shadow-lg rounded-lg overflow-hidden w-52 flex-shrink-0">
                   <img
-                    src={band.image_band.replace(
-                      'C:\\Users\\ASUS\\Documents\\Semester 4 Sisfo\\Pemrograman Web Lanjutan\\Tugas\\E-Ticket Booking Concert\\frontend\\public',
-                      ''
-                    ).replace(/\\/g, '/')}
+                    src={band.image_band}
                     alt="Band"
                     className="w-full h-32 object-cover"
                   />
