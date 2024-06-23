@@ -21,6 +21,8 @@ export default function buy() {
   const [isEventClosed, setIsEventClosed] = useState(false);
   const [bands, setBands] = useState([]);
   const [selectedTicketType, setSelectedTicketType] = useState(null);
+  const [ticketUmum, setTicketUmum] = useState(null);
+  const [ticketVip, setTicketVip] = useState(null);
   const [showModalOrder, setShowModalOrder] = useState(false);
   const [isEmailExist, setIsEmailExist] = useState(false);
   const { id } = router.query;
@@ -57,10 +59,12 @@ export default function buy() {
             if (response.umum_ticket) {
               setTicketPrice(response.umum_ticket.price);
               setAvailUmum(response.umum_ticket.available);
+              setTicketUmum(response.umum_ticket);
             }
             if (response.vip_ticket) {
               setTicketPriceVIP(response.vip_ticket.price);
               setAvailVip(response.vip_ticket.available);
+              setTicketVip(response.vip_ticket);
             }
           }
         } catch (error) {
@@ -122,6 +126,7 @@ export default function buy() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('idUser');
+    localStorage.removeItem('haveOrdered');
     router.push('/login');
     setShowModal(false);
   };
@@ -137,7 +142,12 @@ export default function buy() {
 
   const handleOrder = () => {
     if (isEmailExist){
-      router.push('/payment')
+      localStorage.setItem("haveOrdered", true);
+      if (selectedTicketType === 'umum'){
+        router.push(`/payment/${ticketUmum.ticket_id}`);
+      } else if (selectedTicketType === 'vip'){
+        router.push(`/payment/${ticketVip.ticket_id}`);
+      }
     } else {
       setShowModalOrder(true)
     }
@@ -298,7 +308,7 @@ export default function buy() {
         </div>
       </div>
       {showModalOrder && (
-        <ModalOrder setShowModalOrder={setShowModalOrder}/>
+        <ModalOrder setShowModalOrder={setShowModalOrder} selectedTicketType={selectedTicketType}/>
       )}
     </div>
   );

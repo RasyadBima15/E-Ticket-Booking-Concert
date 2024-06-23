@@ -2,11 +2,37 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import userApi from "@/api/modules/users.api";
+import { useEffect } from "react";
+import ticketApi from "@/api/modules/tickets.api";
 
-const ModalOrder = ({ setShowModalOrder }) => {
+const ModalOrder = ({ setShowModalOrder, selectedTicketType }) => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
   const [isOnRequest, setIsOnRequest] = useState(false);
+  const [ticketUmum, setTicketUmum] = useState(null);
+  const [ticketVip, setTicketVip] = useState(null);
+  const { id } = router.query;
+
+  useEffect(() => {
+    if (id){
+      const fetchTicket = async () => {
+        try {
+          const { response } = await ticketApi.getTicketsByConcert(id);
+          if (response) {
+            if (response.umum_ticket) {
+              setTicketUmum(response.umum_ticket);
+            }
+            if (response.vip_ticket) {
+              setTicketVip(response.vip_ticket);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching ticket:", error);
+        }
+      };
+      fetchTicket()
+    }  
+  }, [id])
 
   const formik = useFormik({
     initialValues: {
@@ -49,9 +75,16 @@ const ModalOrder = ({ setShowModalOrder }) => {
             formData.append('Gender', values.gender);
 
             const { response, error } = await userApi.updateUser(localStorage.getItem('idUser'), formData); 
+            console.log("response:", response);
+            console.log("error:", error);
             if (response) {
                 formik.resetForm();
-                router.push('/payment');
+                localStorage.setItem("haveOrdered", true);
+                if (selectedTicketType === 'umum'){
+                  router.push(`/payment/${ticketUmum.ticket_id}`);
+                } else if (selectedTicketType === 'vip'){
+                  router.push(`/payment/${ticketVip.ticket_id}`);
+                }        
             }
             if (error) {
                 setErrorMessage(error.data.message);

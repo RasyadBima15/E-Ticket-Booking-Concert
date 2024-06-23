@@ -94,6 +94,7 @@ export default function Concert() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('idUser');
+    localStorage.removeItem('haveOrdered');
     router.push('/login');
     setShowModal(false);
   };

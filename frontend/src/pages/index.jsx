@@ -91,6 +91,7 @@ export default function Home() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('idUser');
+    localStorage.removeItem('haveOrdered');
     setIsLoggedIn(false);
     setShowModal(false);
     router.push('/login');

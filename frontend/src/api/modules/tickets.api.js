@@ -3,7 +3,8 @@ import privateClient from "../clients/private.client";
 const ticketEndPoint = {
     createTicket: '/ticket',
     getAllTickets: '/ticket',
-    getTicketByConcert: ({concertId}) => `/ticket/concert/${concertId}`
+    getTicketByConcert: ({concertId}) => `/ticket/concert/${concertId}`,
+    getTicket: ({ticketId}) => `/ticket/${ticketId}`
 }
 
 const ticketApi = {
@@ -31,6 +32,14 @@ const ticketApi = {
             return {error}
         }
     },
+    getTicket: async (ticketId) => {
+        try {
+            const response = await privateClient.get(ticketEndPoint.getTicket({ticketId}));
+            return { response };
+        } catch (error) {
+            return {error}
+        }
+    }
 }
 
 export default ticketApi;

@@ -584,8 +584,8 @@ def get_all_tickets():
 @app.route('/ticket/concert/<int:concert_id>', methods=['GET'])
 def get_tickets_by_concert(concert_id):
     try:
-        umum_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum').first()
-        vip_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='VIP').first()
+        umum_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum', Status='Available').first()
+        vip_ticket = Ticket.query.filter_by(IdConcert=concert_id, TicketType='VIP', Status='Available').first()
 
         available_ticket_umum_count = Ticket.query.filter_by(IdConcert=concert_id, TicketType='Umum', Status='Available').count()
         available_ticket_vip_count = Ticket.query.filter_by(IdConcert=concert_id, TicketType='VIP', Status='Available').count()
@@ -598,14 +598,14 @@ def get_tickets_by_concert(concert_id):
 
         response_data = {}
 
-        if umum_ticket:
+        if available_umum:
             response_data['umum_ticket'] = {
                 'ticket_id': umum_ticket.IdTicket,
                 'price': umum_ticket.Price,
                 'available': available_umum
             }
 
-        if vip_ticket:
+        if available_vip:
             response_data['vip_ticket'] = {
                 'ticket_id': vip_ticket.IdTicket,
                 'price': vip_ticket.Price,
@@ -613,6 +613,25 @@ def get_tickets_by_concert(concert_id):
             }
 
         return jsonify(response_data), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'message': f'Failed to retrieve tickets. Error: {str(e)}'}), 500
+    
+@app.route('/ticket/<int:ticket_id>', methods=['GET'])
+def get_ticket(ticket_id):
+    try:
+        ticket = Ticket.query.get(ticket_id)
+        if not ticket:
+            return jsonify({'message': 'Ticket not found'}), 404
+
+        return jsonify({
+            'ticket_id': ticket.IdTicket,
+            'concert_id': ticket.IdConcert,
+            'ticketType': ticket.TicketType,
+            'status': ticket.Status,
+            'price': ticket.Price
+        }), 200
 
     except Exception as e:
         print(e)
@@ -625,7 +644,7 @@ def create_payment():
     if current_user.Role == "Admin":
         return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
-        data = request.json
+        data = request.form
         user_id = data.get('IdUser')
         ticket_id = data.get('IdTicket')
         payment_date_str = data.get('PaymentDate')
