@@ -174,8 +174,11 @@ def create_band():
             file.save(file_path)
         else:
             return jsonify({'message': 'ImageBand is required!'}), 400
+        
+        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+        relative_path = relative_path.replace('\\', '/')
 
-        new_band = Band(Name=name, ImageBand=file_path, IdConcert=id_concert)
+        new_band = Band(Name=name, ImageBand=relative_path, IdConcert=id_concert)
 
         db.session.add(new_band)
         db.session.commit()
@@ -214,8 +217,6 @@ def get_all_bands():
 @app.route('/band/<int:band_id>', methods=['GET'])
 @jwt_required()
 def get_band(band_id):
-    if current_user.Role == "Admin":
-        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
     try:
         band = Band.query.get(band_id)
 
@@ -273,8 +274,6 @@ def update_band(band_id):
             band = Band.query.get(band_id)
             if band and band.ImageBand:
                 old_image_path = os.path.join(app.config['UPLOAD_BAND'], band.ImageBand)
-                print(old_image_path)
-                print(band.ImageBand)
                 if os.path.exists(old_image_path):
                     os.remove(old_image_path)
             
@@ -282,6 +281,9 @@ def update_band(band_id):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_BAND'], filename)
             file.save(file_path)
+        
+        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+        relative_path = relative_path.replace('\\', '/')
 
         band = Band.query.get(band_id)
 
@@ -291,7 +293,7 @@ def update_band(band_id):
         if name:
             band.Name = name
         if file:
-            band.ImageBand = file_path
+            band.ImageBand = relative_path
         if id_concert:
             band.IdConcert = id_concert
 
@@ -357,9 +359,12 @@ def create_concert():
             file.save(file_path)
         else:
             return jsonify({'message': 'ImageConcert is required!'}), 400
+        
+        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+        relative_path = relative_path.replace('\\', '/')
 
         # Create new Concert object
-        new_concert = Concert(Nama=nama, Lokasi=lokasi, ImageConcert=file_path,
+        new_concert = Concert(Nama=nama, Lokasi=lokasi, ImageConcert=relative_path,
                               StartDate=start_date, EndDate=end_date, Deskripsi=deskripsi)
 
         db.session.add(new_concert)
@@ -452,6 +457,10 @@ def update_concert(concert_id):
             file_path = os.path.join(app.config['UPLOAD_CONCERT'], filename)
             file.save(file_path)
 
+        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+        print(relative_path)
+        relative_path = relative_path.replace('\\', '/')
+
         concert = Concert.query.get(concert_id)
 
         if not concert:
@@ -462,7 +471,7 @@ def update_concert(concert_id):
         if lokasi:
             concert.Lokasi = lokasi
         if file:
-            concert.ImageConcert = file_path
+            concert.ImageConcert = relative_path
         if start_date:
             concert.StartDate = start_date
         if end_date:
