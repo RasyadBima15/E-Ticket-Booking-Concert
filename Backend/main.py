@@ -712,31 +712,31 @@ def get_all_payments():
         return jsonify({'message': f'Failed to retrieve payments. Error: {str(e)}'}), 500
 
 # Get payment by IdUser
-@app.route('/payment/user/<int:user_id>', methods=['GET'])
-@jwt_required()
-def get_payments_by_user(user_id):
-    if current_user.Role == "Admin":
-        return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
-    try:
-        payments = Payment.query.filter_by(IdUser=user_id).all()
+# @app.route('/payment/user/<int:user_id>', methods=['GET'])
+# @jwt_required()
+# def get_payments_by_user(user_id):
+#     if current_user.Role == "Admin":
+#         return jsonify({'message': 'Hanya User yang bisa mengakses endpoint ini!'}), 404
+#     try:
+#         payments = Payment.query.filter_by(IdUser=user_id).all()
 
-        if not payments:
-            return jsonify({'message': 'No payments found for this user'}), 404
+#         if not payments:
+#             return jsonify({'message': 'No payments found for this user'}), 404
 
-        payments_data = []
-        for payment in payments:
-            payments_data.append({
-                'payment_id': payment.IdPayment,
-                'user_id': payment.IdUser,
-                'ticket_id': payment.IdTicket,
-                'payment_date': payment.PaymentDate,
-                'amount': payment.Amount
-            })
+#         payments_data = []
+#         for payment in payments:
+#             payments_data.append({
+#                 'payment_id': payment.IdPayment,
+#                 'user_id': payment.IdUser,
+#                 'ticket_id': payment.IdTicket,
+#                 'payment_date': payment.PaymentDate,
+#                 'amount': payment.Amount
+#             })
 
-        return jsonify(payments_data), 200
+#         return jsonify(payments_data), 200
 
-    except Exception as e:
-        return jsonify({'message': f'Failed to retrieve payments. Error: {str(e)}'}), 500
+#     except Exception as e:
+#         return jsonify({'message': f'Failed to retrieve payments. Error: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
