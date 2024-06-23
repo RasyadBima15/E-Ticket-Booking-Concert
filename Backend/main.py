@@ -648,25 +648,28 @@ def create_payment():
         user_id = data.get('IdUser')
         ticket_id = data.get('IdTicket')
         payment_date_str = data.get('PaymentDate')
-        amount = data.get('Amount')
+        amount_str = data.get('Amount')
 
         payment_date = datetime.strptime(payment_date_str, "%Y-%m-%d").date()
 
+        # Convert amount to integer
+        amount = int(amount_str)
+
         user = User.query.get(user_id)
         if not user:
-            return jsonify({'message': 'User not found'}), 404
+            return jsonify({'message': 'User tidak ditemukan!'}), 404
 
         ticket = Ticket.query.get(ticket_id)
         if not ticket :
-            return jsonify({'message': 'Ticket not found'}), 404
+            return jsonify({'message': 'Ticket tidak ditemukan!'}), 404
         
         if ticket.Status == "Soldout":
-            return jsonify({'message': 'Ticket has been soldout'}), 404
+            return jsonify({'message': 'Ticket sudah terjual!'}), 404
         
         ticket.Status = "Soldout"
 
         if user.Balance < amount:
-            return jsonify({'message': 'Insufficient balance'}), 400
+            return jsonify({'message': 'Maaf! Saldo anda tidak cukup!'}), 400
 
         new_payment = Payment(IdUser=user_id, IdTicket=ticket_id, PaymentDate=payment_date, Amount=amount)
 

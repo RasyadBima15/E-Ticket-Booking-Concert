@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import ModalLogout from "@/components/ModalLogout";
@@ -22,10 +21,12 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
+
     if (token) {
       setIsLoggedIn(true);
       setRole(role);
     }
+
     const fetchEvents = async () => {
       const { response, error } = await concertApi.getAllConcerts();
       if (response) {
@@ -40,13 +41,12 @@ export default function Home() {
 
         // Get the latest two events
         const sortedUpcoming = upcoming.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-        console.log(sortedUpcoming.slice(0, 2));
         setLatestEvents(sortedUpcoming.slice(0, 2));
       } else {
         console.error("Error fetching events:", error);
       }
     };
-    fetchEvents(); 
+    fetchEvents();
   }, [router]);
 
   const formatDateRange = (startDate, endDate) => {
@@ -54,8 +54,8 @@ export default function Home() {
     const end = new Date(endDate);
 
     const months = [
-        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+      "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+      "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
     ];
 
     const formattedStartDate = `${months[start.getMonth()]} ${start.getDate()}-${end.getDate()}`;
@@ -65,20 +65,20 @@ export default function Home() {
 
   const truncateDescription = (description) => {
     if (description.length > 120) {
-        return `${description.slice(0, 120)}...`;
+      return `${description.slice(0, 120)}...`;
     }
     return description;
   };
 
   const truncateDescriptionCarousel = (description) => {
     if (description.length > 300) {
-        return `${description.slice(0, 300)}...`;
+      return `${description.slice(0, 300)}...`;
     }
     return description;
   };
 
   const handleEventClick = (eventId) => {
-    if(isLoggedIn && role === 'User'){
+    if (isLoggedIn && role === 'User') {
       router.push(`/concert/detailbuy/${eventId}`);
     } else if (role === 'Admin') {
       router.push(`/concert/${eventId}`);
@@ -101,7 +101,7 @@ export default function Home() {
     <div className="bg-white text-gray-900">
       {/* Header */}
       <header className="bg-gradient-to-r from-purple-800 to-purple-600 text-white p-6 flex justify-between items-center relative z-20">
-        <div className="flex items-center cursor-pointer"  onClick={handleLogoClick}>
+        <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img src="/images/logos/logo1.png" alt="Logo" className="w-5 h-5 mr-2" />
           <div className="text-2xl font-bold">E-Ticket Booking Concert</div>
         </div>
@@ -130,7 +130,7 @@ export default function Home() {
                 Logout
               </button>
               {showModal && (
-                <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout}/>
+                <ModalLogout setShowModal={setShowModal} handleLogout={handleLogout} />
               )}
             </>
           )}
@@ -139,25 +139,25 @@ export default function Home() {
 
       {/* Carousel for Latest Events */}
       <section className="relative z-10">
-            <Carousel showThumbs={false} showStatus={false} >
-              {latestEvents.map(event => (
-                <div key={event.concert_id} className="relative">
-                  <img
-                    src={`${event.image_concert}`}
-                    alt="Image Alt Text"
-                    className="w-full h-[500px] object-center filter blur-sm"
-                  />
-                  <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 p-4 text-white">
-                    <h2 className="relative cursor-pointer transform hover:scale-105 transition duration-300 text-5xl font-bold text-center mb-8 select-none" onClick={() => handleEventClick(event.concert_id)}>{event.nama}</h2>
-                    <div className="text-lg font-bold text-gray-200 select-none">{formatDateRange(event.start_date, event.end_date)}</div>
-                    <p className="mt-2 px-64 text-gray-300 select-none">
+        <Carousel showThumbs={false} showStatus={false}>
+          {latestEvents.map(event => (
+            <div key={event.concert_id} className="relative">
+              <img
+                src={`${event.image_concert}`}
+                alt="Image Alt Text"
+                className="w-full h-[500px] object-center filter blur-sm"
+              />
+              <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 p-4 text-white">
+                <h2 className="relative cursor-pointer transform hover:scale-105 transition duration-300 text-5xl font-bold text-center mb-8 select-none" onClick={() => handleEventClick(event.concert_id)}>{event.nama}</h2>
+                <div className="text-lg font-bold text-gray-200 select-none">{formatDateRange(event.start_date, event.end_date)}</div>
+                <p className="mt-2 px-64 text-gray-300 select-none">
                   {truncateDescriptionCarousel(event.deskripsi)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </Carousel>
-    </section>
+                </p>
+              </div>
+            </div>
+          ))}
+        </Carousel>
+      </section>
 
       {/* Upcoming Events Section */}
       <section className="py-16 px-8 relative z-10">
@@ -165,19 +165,19 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {upcomingEvents.map(event => (
             <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
-            <img
+              <img
                 src={`${event.image_concert}`}
                 alt="Event"
                 className="w-full h-48 object-center"
               />
-            <div className="p-4">
-              <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
-              <h3 className="text-xl font-bold">{event.nama}</h3>
-              <p className="mt-2 text-gray-700">
-                {truncateDescription(event.deskripsi)}
-              </p>
+              <div className="p-4">
+                <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
+                <h3 className="text-xl font-bold">{event.nama}</h3>
+                <p className="mt-2 text-gray-700">
+                  {truncateDescription(event.deskripsi)}
+                </p>
+              </div>
             </div>
-          </div>
           ))}
         </div>
       </section>
@@ -186,18 +186,18 @@ export default function Home() {
       <section className="py-16 px-8 bg-gray-100 relative z-10">
         <h2 className="text-3xl font-bold text-center mb-8">Previous Events</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {previousEvents.map(event => (
-          <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
-          <img src={`${event.image_concert}`} alt="Event" className="w-full h-48 object-center" />
-          <div className="p-4">
-            <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
-            <h3 className="text-xl font-bold">{event.nama}</h3>
-            <p className="mt-2 text-gray-700">
-              {truncateDescription(event.deskripsi)}
-            </p>
-          </div>
-        </div>
-        ))}
+          {previousEvents.map(event => (
+            <div key={event.concert_id} className="bg-white shadow-md rounded overflow-hidden cursor-pointer" onClick={() => handleEventClick(event.concert_id)}>
+              <img src={`${event.image_concert}`} alt="Event" className="w-full h-48 object-center" />
+              <div className="p-4">
+                <div className="text-sm text-gray-500">{formatDateRange(event.start_date, event.end_date)}</div>
+                <h3 className="text-xl font-bold">{event.nama}</h3>
+                <p className="mt-2 text-gray-700">
+                  {truncateDescription(event.deskripsi)}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -210,10 +210,10 @@ export default function Home() {
               <h3 className="text-2xl font-bold">E-Ticket Booking Concert</h3>
             </div>
             <p className="mt-5 max-w-lg mx-auto">
-            E-Ticket-Booking-Concert adalah aplikasi 
-            yang menyediakan layanan pemesanan tiket konser secara online,
-            Sejak berdiri pada tahun 2010, kami telah melayani jutaan pengguna di seluruh 
-            Indonesia dengan berbagai pilihan konser dari artis lokal hingga internasional. 
+              E-Ticket-Booking-Concert adalah aplikasi
+              yang menyediakan layanan pemesanan tiket konser secara online,
+              Sejak berdiri pada tahun 2024, kami telah melayani jutaan pengguna di seluruh
+              Indonesia dengan berbagai pilihan konser dari artis lokal hingga internasional.
             </p>
           </div>
           <div className="text-sm">

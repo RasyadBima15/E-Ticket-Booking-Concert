@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import ticketApi from '@/api/modules/tickets.api';
 import concertApi from '@/api/modules/concerts.api';
 import userApi from '@/api/modules/users.api';
+import paymentApi from '@/api/modules/payments.api';
 import ModalBuy from '@/components/ModalBuy';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Payment() {
     const router = useRouter();
@@ -15,6 +18,7 @@ export default function Payment() {
     const [email, setEmail] = useState(false);
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [ordered, setOrdered] = useState(false);
+    const [isOnRequest, setIsOnRequest] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -26,7 +30,7 @@ export default function Payment() {
           router.push('/admin/concerts');
         } else if (haveOrdered) {
           if (id) {
-            setOrdered(true)
+            setOrdered(true);
             const fetchTicket = async () => {
               try {
                 const { response } = await ticketApi.getTicket(id);
@@ -50,8 +54,8 @@ export default function Payment() {
             };
             fetchTicket();
             fetchUser();
-          } else if (!haveOrdered){
-            setOrdered(false)
+          } else {
+            setOrdered(false);
           }
         }
     }, [router, id]);
@@ -95,7 +99,40 @@ export default function Payment() {
       return `${day}${ordinalSuffix(day)} ${month} ${year}`;
     }
 
-    const handleBuy = () => {
+    const handleBuy = async () => {
+      if (isOnRequest) return;
+      setIsOnRequest(true);
+      try {
+        const formData = new FormData();
+        formData.append('IdUser', localStorage.getItem('idUser'));
+        formData.append('IdTicket', ticket.ticket_id);
+        formData.append('PaymentDate', new Date().toISOString().split('T')[0]);
+        formData.append('Amount', ticket.price);
+
+        const { response, error } = await paymentApi.createPayment(formData);
+        console.log(error);
+
+        if (response) {
+          toast.success("Tiket berhasil dibeli!");
+          localStorage.removeItem("haveOrdered");
+          setTimeout(() => {
+            router.push('/');
+          }, 3000);
+        }
+        if (error) {
+          toast.error(`${error.data.message}`);
+          localStorage.removeItem("haveOrdered");
+          setTimeout(() => {
+            router.push('/');
+          }, 3000);
+        }
+      } catch (error) {
+        toast.error(`Error: ${error}`);
+        localStorage.removeItem("haveOrdered");
+        setTimeout(() => {
+          router.push('/');
+        }, 3000);
+      }
       setShowModalBuy(false);
     };
 
@@ -104,10 +141,12 @@ export default function Payment() {
         <div className="min-h-screen flex items-center justify-center bg-white">
           <h2 className="text-2xl font-bold mb-6 text-center text-purple-700">Not Found 404</h2>
         </div>
-    )}
+      );
+    }
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <ToastContainer />
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
           <h2 className="text-2xl font-bold mb-6">Payment</h2>
           {ticket && concert ? (
@@ -156,7 +195,7 @@ export default function Payment() {
           )}
         </div>
         {showModalBuy && (
-          <ModalBuy setShowModalBuy={setShowModalBuy} handleBuy={handleBuy}/>
+          <ModalBuy setShowModalBuy={setShowModalBuy} handleBuy={handleBuy} isOnRequest={isOnRequest}/>
         )}
       </div>
     );

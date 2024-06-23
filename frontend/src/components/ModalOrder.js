@@ -75,8 +75,8 @@ const ModalOrder = ({ setShowModalOrder, selectedTicketType }) => {
             formData.append('Gender', values.gender);
 
             const { response, error } = await userApi.updateUser(localStorage.getItem('idUser'), formData); 
-            console.log("response:", response);
-            console.log("error:", error);
+            // console.log("response:", response);
+            // console.log("error:", error);
             if (response) {
                 formik.resetForm();
                 localStorage.setItem("haveOrdered", true);

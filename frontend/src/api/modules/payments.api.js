@@ -6,9 +6,9 @@ const paymentEndPoint = {
 }
 
 const paymentApi = {
-    createPayment: async (data) => {
+    createPayment: async (formData) => {
         try {
-            const response = await privateClient.post(paymentEndPoint.createPayment, data)
+            const response = await privateClient.post(paymentEndPoint.createPayment, formData)
             return { response }
         } catch (error) {
             return { error }
