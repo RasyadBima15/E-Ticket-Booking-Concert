@@ -22,8 +22,12 @@ export default function Concert() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem('role')
     if (token) {
       setIsLoggedIn(true);
+      if (role === 'User'){
+        router.push(`/concert/detailbuy/${id}`)
+      }
     }
     if (id) {
       const fetchConcert = async () => {
@@ -145,7 +149,7 @@ export default function Concert() {
         <h1 className="text-3xl font-bold text-purple-800 mb-4">{concert.nama}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="lg:col-span-1 w-62">
-            <img src={`${imageConcert}`} alt="Event" className="w-full h-full object-cover rounded-md" />
+            <img src={`${imageConcert}`} alt="Event" className="w-full h-[450px] object-center rounded-md" />
           </div>
           <div className="lg:col-span-1">
             <h2 className="text-2xl font-bold text-purple-800 mb-4">List Band</h2>

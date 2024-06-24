@@ -268,6 +268,8 @@ def update_band(band_id):
         name = data.get('Name')
         id_concert = data.get('IdConcert')
 
+        file_path = None
+
         # Handle file upload
         file = request.files.get('ImageBand')
         if file:
@@ -283,8 +285,9 @@ def update_band(band_id):
             file_path = os.path.join(app.config['UPLOAD_BAND'], filename)
             file.save(file_path)
         
-        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
-        relative_path = relative_path.replace('\\', '/')
+        if file_path:
+            relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+            relative_path = relative_path.replace('\\', '/')
 
         band = Band.query.get(band_id)
 
@@ -293,7 +296,7 @@ def update_band(band_id):
 
         if name:
             band.Name = name
-        if file:
+        if file_path:
             band.ImageBand = relative_path
         if id_concert:
             band.IdConcert = id_concert
@@ -443,6 +446,8 @@ def update_concert(concert_id):
         end_date = data.get('EndDate')
         deskripsi = data.get('Deskripsi')
 
+        file_path = None
+
         # Handle file upload
         file = request.files.get('ImageConcert')
         if file:
@@ -458,9 +463,10 @@ def update_concert(concert_id):
             file_path = os.path.join(app.config['UPLOAD_CONCERT'], filename)
             file.save(file_path)
 
-        relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
-        print(relative_path)
-        relative_path = relative_path.replace('\\', '/')
+        if file_path:
+            relative_path = '\\' + '\\'.join(file_path.split('\\')[-3:])
+            # print(relative_path)
+            relative_path = relative_path.replace('\\', '/')
 
         concert = Concert.query.get(concert_id)
 

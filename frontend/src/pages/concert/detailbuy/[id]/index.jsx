@@ -84,6 +84,7 @@ export default function buy() {
       const fetchUser = async () => {
         try {
           const { response } = await userApi.checkEmailUser(localStorage.getItem('idUser'));
+          // console.log(response);
           if (response) {
             if(response.message === 'Email user sudah ada'){
               setIsEmailExist(true)

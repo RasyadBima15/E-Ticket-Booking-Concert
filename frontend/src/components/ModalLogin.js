@@ -38,6 +38,7 @@ const ModalLogin = ({ setShowModalLogin }) => {
             loginForm.resetForm()
             localStorage.setItem("token", response.access_token);
             localStorage.setItem("role", response.role);
+            localStorage.setItem("idUser", response.idUser);
 
             if (response.role === "Admin"){
                 router.push('/admin/concerts');  
